@@ -19,18 +19,24 @@ class CTImagesDataset(Dataset):
                 on a sample.
         """
         self.root_dir = root_dir
-        self.sub_dirs = os.listdir(root_dir)
+        # Only get name, if directory
+        self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
         # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
+
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename:
+                    # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
-                    label_filepaths = [os.path.join(self.root_dir, sub_dir, fn) for fn in
-                                   sub_dir_files if
-                                   LABEL_SUFFIX in fn and fn.endswith(MHA_FORMAT) and filename[0: -4] in fn]
-
+                    # Label paths
+                    label_filepaths =
+                        [os.path.join(self.root_dir, sub_dir, labelname)
+                            for labelname in sub_dir_files
+                                if LABEL_SUFFIX in labelname and labelname.endswith(MHA_FORMAT)
+                                    and filename[0:-4] in labelname]
+                    # Append paths from found images with corresponding labels                 
                     allfiles.append([image_filepath, label_filepaths])
         self.allfiles = allfiles
 
@@ -81,7 +87,9 @@ def load_label_mask(mha_label_list, mask_size):
 
 
 if __name__ == '__main__':
-    data = CTImagesDataset("/home/marcel/Uni/Master/1.Semester/VC Praktikum/CTSamples")
+    data = CTImagesDataset("/visinf/project_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/")
+    counter = 0
     for datax in data:
-        print("lala")
-    print("lala")
+        counter += 1
+        print(counter)
+    print("end")
