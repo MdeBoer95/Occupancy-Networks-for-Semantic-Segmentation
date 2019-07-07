@@ -31,12 +31,11 @@ class CTImagesDataset(Dataset):
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
-                    label_filepaths =
-                        [os.path.join(self.root_dir, sub_dir, labelname)
-                            for labelname in sub_dir_files
-                                if LABEL_SUFFIX in labelname and labelname.endswith(MHA_FORMAT)
-                                    and filename[0:-4] in labelname]
-                    # Append paths from found images with corresponding labels                 
+                    label_filepaths = [os.path.join(self.root_dir, sub_dir, labelname)
+                                        for labelname in sub_dir_files
+                                            if LABEL_SUFFIX in labelname and labelname.endswith(MHA_FORMAT)
+                                                and filename[0:-4] in labelname]
+                    # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
         self.allfiles = allfiles
 
