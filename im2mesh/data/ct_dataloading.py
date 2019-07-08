@@ -51,7 +51,7 @@ class CTImagesDataset(Dataset):
             mha_labels.append(load(os.path.join(labelpath)))
         label = load_label_mask(mha_labels, image_shape)
 
-        transformations = [ct_transforms.ReplicateBorderPadding3D((image_shape[0], 448, image_shape[2])),
+        transformations = [ct_transforms.ReplicateBorderPadding3D((image_shape[0], 448, 512)),
                            ct_transforms.ToTensor(),
                            ct_transforms.Rescale((32, 32, 32))]
         # if z dim is too small, pad to 512
