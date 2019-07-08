@@ -4,7 +4,7 @@ import numpy as np
 from medpy.io import load
 from torch.utils.data import Dataset, DataLoader
 import torchvision
-from im2mesh.data import ct_transforms
+import ct_transforms
 
 LABEL_SUFFIX = "_label_"  # followed by a number and the file format
 MHA_FORMAT = ".mha"
@@ -86,7 +86,7 @@ def load_label_mask(mha_label_list, mask_size):
 
 
 if __name__ == '__main__':
-    data = CTImagesDataset("/visinf/project_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/")
+    data = CTImagesDataset("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/")
     counter = 0
     for datax in data:
         counter += 1
