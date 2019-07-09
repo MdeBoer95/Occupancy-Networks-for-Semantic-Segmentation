@@ -5,6 +5,7 @@ build
 .vscode
 .pytest_cache
 .idea
+configs/voxels/onet.yaml
 .cache
 *.pyc
 *.pt

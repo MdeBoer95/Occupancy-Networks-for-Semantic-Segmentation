@@ -1,7 +1,7 @@
 method: onet
 data:
   input_type: voxels
-  path: data/ShapeNet
+  path: /data/mdeboer/ShapeNet
   dim: 3
   points_subsample: 1024
 model:

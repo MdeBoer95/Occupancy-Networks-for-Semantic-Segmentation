@@ -3,8 +3,10 @@ import torch.nn.functional as tf
 import numpy as np
 
 
-class Rescale(object):
-    """Rescale the tensor in a sample to a given size.
+class NaiveRescale(object):
+    """Rescale the ndarray to a given size by taking every n_i-th pixel of the i-th axis,
+    where n_i = image.shape[i]/output_size[i].
+    Note that this requires that image.shape[i] is dividable by output_size[i]
 
     Args:
         output_size (tuple or int): Desired output size.
@@ -16,12 +18,15 @@ class Rescale(object):
 
     def __call__(self, image):
         """
-        Expect 4 dim tensor in C x D x H x W format
+        Expect 3 dim ndarray. Note the requirements mentions above
         """
-        assert isinstance(image, torch.Tensor)
+        assert isinstance(image, np.ndarray)
+        x_scalefactor = image.shape[0]//self.output_size[0]
+        y_scalefactor = image.shape[1]//self.output_size[1]
+        z_scalefactor = image.shape[2]//self.output_size[2]
 
-        image = tf.interpolate(image.view((1,) + image.size()).double(), size=self.output_size, mode='nearest')
-        image = image.view((1,) + self.output_size)
+        image = image[0::x_scalefactor, 0::y_scalefactor, 0::z_scalefactor]
+
         return image
 
 
@@ -33,7 +38,6 @@ class ToTensor(object):
         # numpy image: H x W x D
         # torch image: C x D x H x W
         image = image.transpose((2, 0, 1))
-        image = image[np.newaxis,...]  # dim for channels
         image = torch.from_numpy(image.astype('int32'))
         return image
 
