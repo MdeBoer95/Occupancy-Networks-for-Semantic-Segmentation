@@ -1,5 +1,5 @@
 method: onet
-data:
+data: /visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/
   input_type: voxels
   path:
   dim: 3
