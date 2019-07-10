@@ -1,17 +1,17 @@
 method: onet
 data:
   input_type: voxels
-  path: /data/mdeboer/ShapeNet
+  path:
   dim: 3
   points_subsample: 1024
 model:
   encoder_latent: null
   decoder: cbatchnorm
   encoder: voxel_simple
-  c_dim: 256 
+  c_dim: 256
   z_dim: 0
 training:
-  out_dir:  out/voxels/onet
+  out_dir:  out/semseg/onet
   batch_size: 64
   model_selection_metric: iou
   model_selection_mode: maximize
