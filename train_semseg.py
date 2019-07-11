@@ -50,7 +50,7 @@ train_dataset = ct.CTImagesDataset(root)
 #val_dataset = ct.CTImagesDataset(root,'val')
 
 #val_dataset = config.get_dataset('val', cfg)
-
+print(train_dataset)
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=batch_size, num_workers=4, shuffle=True,
     collate_fn=data.collate_remove_none,
