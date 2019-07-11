@@ -9,6 +9,7 @@ import matplotlib; matplotlib.use('Agg')
 from im2mesh import config, data
 from im2mesh.checkpoints import CheckpointIO
 import im2mesh.data.ct_dataloading as ct
+import json
 
 
 # Arguments
@@ -41,7 +42,7 @@ cfg_test = {
     "points_subsample": 1024
     }
 }
-cfg = config.load_config(cfg_test, 'configs/default.yaml')
+cfg = config.load_config(json.dumps(cfg_test), 'configs/default.yaml')
 # Set t0
 t0 = time.time()
 
