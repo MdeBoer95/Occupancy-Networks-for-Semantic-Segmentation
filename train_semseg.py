@@ -71,7 +71,7 @@ data_vis = next(iter(vis_loader))
 '''
 # Model
 model = config.get_model(cfg, device=device, dataset=train_dataset)
-'''
+
 # Intialize training
 npoints = 1000
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
@@ -128,12 +128,12 @@ while True:
         if print_every > 0 and (it % print_every) == 0:
             print('[Epoch %02d] it=%03d, loss=%.4f'
                   % (epoch_it, it, loss))
-
+        '''
         # Visualize output
         if visualize_every > 0 and (it % visualize_every) == 0:
             print('Visualizing')
             trainer.visualize(data_vis)
-
+         
         # Save checkpoint
         if (checkpoint_every > 0 and (it % checkpoint_every) == 0):
             print('Saving checkpoint')
@@ -144,7 +144,7 @@ while True:
         if (backup_every > 0 and (it % backup_every) == 0):
             print('Backup checkpoint')
             checkpoint_io.save('model_%d.pt' % it, epoch_it=epoch_it, it=it,
-                               loss_val_best=metric_val_best)
+                           loss_val_best=metric_val_best)
         # Run validation
         if validate_every > 0 and (it % validate_every) == 0:
             eval_dict = trainer.evaluate(val_loader)
@@ -160,11 +160,10 @@ while True:
                 print('New best model (loss %.4f)' % metric_val_best)
                 checkpoint_io.save('model_best.pt', epoch_it=epoch_it, it=it,
                                    loss_val_best=metric_val_best)
-
+        '''
         # Exit if necessary
         if exit_after > 0 and (time.time() - t0) >= exit_after:
             print('Time limit reached. Exiting.')
             checkpoint_io.save('model.pt', epoch_it=epoch_it, it=it,
                                loss_val_best=metric_val_best)
             exit(3)
-'''
