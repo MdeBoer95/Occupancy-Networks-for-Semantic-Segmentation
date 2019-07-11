@@ -45,7 +45,8 @@ if not os.path.exists(out_dir):
 # Dataset
 # TODO
 train_dataset = ct.CTImagesDataset(root)
-print(train_dataset[0])
+#val_dataset = ct.CTImagesDataset(root,'val')
+
 #val_dataset = config.get_dataset('val', cfg)
 '''
 train_loader = torch.utils.data.DataLoader(

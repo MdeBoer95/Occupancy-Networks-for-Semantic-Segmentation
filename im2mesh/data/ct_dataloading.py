@@ -17,7 +17,7 @@ class CTImagesDataset(Dataset):
     def __init__(self, root_dir):
         """
         Args:
-            root_dir (string): Directory with the subdirectories for each image.
+            root_dir (string): Name of directory with the subdirectories for each image.
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
@@ -40,7 +40,9 @@ class CTImagesDataset(Dataset):
                                                 and filename[0:-4] in labelname]
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
+
         self.allfiles = allfiles
+        print(allfiles)
 
     def __len__(self):
         return len(self.allfiles)
