@@ -72,9 +72,9 @@ model = config.get_model({
     "method": "onet",
     "model":
       {
-      "encoder_latent": null,
-      "decoder": cbatchnorm,
-      "encoder": voxel_simple,
+      "encoder_latent": "null",
+      "decoder": "cbatchnorm",
+      "encoder": "voxel_simple",
       "c_dim": 256,
       "z_dim": 0
       }
