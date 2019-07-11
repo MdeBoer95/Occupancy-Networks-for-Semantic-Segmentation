@@ -42,7 +42,7 @@ class CTImagesDataset(Dataset):
                     allfiles.append([image_filepath, label_filepaths])
 
         self.allfiles = allfiles
-        print(allfiles)
+        
 
     def __len__(self):
         return len(self.allfiles)
