@@ -39,7 +39,7 @@ cfg = {
   "multi_gpu": false,
   "c_dim": 512,
   "z_dim": 64,
-  "use_camera": false,
+  "use_camera": "false",
   "dmc_weight_prior": 10.
   },
   "data":
