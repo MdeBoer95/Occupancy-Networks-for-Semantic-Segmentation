@@ -21,13 +21,14 @@ class CTImagesDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
+        print("Started loading data")
         self.root_dir = root_dir
         # Only get name, if directory
         self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
         # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         while len(allfiles) < 10:
-
+            print("datalength: ", len(allfiles))
             for sub_dir in self.sub_dirs :
                 sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
                 for filename in sub_dir_files:
