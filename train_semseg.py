@@ -22,11 +22,11 @@ parser.add_argument('--exit-after', type=int, default=-1,
                          'with exit code 2.')
 
 args = parser.parse_args()
-#cfg = config.load_config(args.config, 'configs/default.yaml')
+cfg = config.load_config('configs/semseg/onet.yaml', 'configs/default.yaml')
 is_cuda = (torch.cuda.is_available() and not args.no_cuda)
 device = torch.device("cuda" if is_cuda else "cpu")
+print(device)
 
-cfg = config.load_config('configs/semseg/onet.yaml', 'configs/default.yaml')
 # Set t0
 t0 = time.time()
 
@@ -112,7 +112,7 @@ visualize_every = cfg['training']['visualize_every']
 
 # Print model
 nparameters = sum(p.numel() for p in model.parameters())
-print(model)
+# print(model)
 print('Total number of parameters: %d' % nparameters)
 
 while True:
@@ -128,7 +128,7 @@ while True:
         if print_every > 0 and (it % print_every) == 0:
             print('[Epoch %02d] it=%03d, loss=%.4f'
                   % (epoch_it, it, loss))
-        print("I did it")          
+        print("I did it")
         '''
         # Visualize output
         if visualize_every > 0 and (it % visualize_every) == 0:
