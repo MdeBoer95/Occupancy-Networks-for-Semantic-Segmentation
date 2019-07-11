@@ -74,6 +74,7 @@ class CTImagesDataset(Dataset):
         points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024)
 
         sample = {'points': points, 'points.occ': points_occ, 'inputs': image}
+        print(sample)
         return sample
 
 

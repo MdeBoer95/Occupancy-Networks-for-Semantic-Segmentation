@@ -38,8 +38,8 @@ class ToTensor(object):
         # numpy image: H x W x D
         # torch image: C x D x H x W
         image = image.transpose((2, 0, 1))
-        image = torch.from_numpy(image.astype('int32'))
-        print(image)
+        image = torch.from_numpy(image.astype('float32'))
+
         return image
 
 

@@ -11,7 +11,7 @@ model:
   z_dim: 0
 training:
   out_dir:  out/semseg/onet
-  batch_size: 64
+  batch_size: 1
   model_selection_metric: iou
   model_selection_mode: maximize
 test:
