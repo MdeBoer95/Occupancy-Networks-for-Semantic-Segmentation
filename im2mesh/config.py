@@ -18,7 +18,7 @@ method_dict = {
 def load_config(path, default_path=None):
     ''' Loads config file.
 
-    Args:  
+    Args:
         path (str): path to config file
         default_path (bool): whether to use default path
     '''
@@ -170,7 +170,6 @@ def get_dataset(mode, cfg, return_idx=False, return_category=False):
         )
     else:
         raise ValueError('Invalid dataset "%s"' % cfg['data']['dataset'])
- 
     return dataset
 
 
