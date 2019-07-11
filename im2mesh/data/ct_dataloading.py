@@ -6,7 +6,7 @@ import numpy as np
 from medpy.io import load
 from torch.utils.data import Dataset, DataLoader
 import torchvision
-import ct_transforms
+import im2mesh.data.ct_transforms
 import time
 
 LABEL_SUFFIX = "_label_"  # followed by a number and the file format
