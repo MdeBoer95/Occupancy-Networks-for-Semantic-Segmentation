@@ -1,8 +1,6 @@
 method: onet
 data:
-  dataset: weapons
   input_type: voxels
-  path: /visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/
   dim: 3
   points_subsample: 1024
 model:

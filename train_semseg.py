@@ -25,24 +25,8 @@ args = parser.parse_args()
 #cfg = config.load_config(args.config, 'configs/default.yaml')
 is_cuda = (torch.cuda.is_available() and not args.no_cuda)
 device = torch.device("cuda" if is_cuda else "cpu")
-cfg_test = {
-"method": "onet",
-"model":
-  {
-  "encoder_latent": "null",
-  "decoder": "cbatchnorm",
-  "encoder": "voxel_simple",
-  "c_dim": 256,
-  "z_dim": 0,
-  },
-  "data":
-    {
-    "input_type": "voxels",
-    "dim": 3,
-    "points_subsample": 1024
-    }
-}
-cfg = config.load_config(json.dumps(cfg_test), 'configs/default.yaml')
+
+cfg = config.load_config('configs/semseg/onet.yaml', 'configs/default.yaml')
 # Set t0
 t0 = time.time()
 
