@@ -32,7 +32,15 @@ cfg = {
   "decoder": "cbatchnorm",
   "encoder": "voxel_simple",
   "c_dim": 256,
-  "z_dim": 0
+  "z_dim": 0,
+  "decoder_kwargs": {},
+  "encoder_kwargs": {},
+  "encoder_latent_kwargs": {},
+  "multi_gpu": false,
+  "c_dim": 512,
+  "z_dim": 64,
+  "use_camera": false,
+  "dmc_weight_prior": 10.
   },
   "data":
     {
