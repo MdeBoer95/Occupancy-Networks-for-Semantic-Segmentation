@@ -27,9 +27,10 @@ class CTImagesDataset(Dataset):
         self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
         # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
-        print("datalength: ", len(allfiles))
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
+            if(len(allfiles) > 9):
+                break
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename:
                     # Image paths
@@ -41,9 +42,8 @@ class CTImagesDataset(Dataset):
                                                 and filename[0:-4] in labelname]
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
-                    if(len(allfiles) > 9):
-                        break
-                    print("datalength: ", len(allfiles))
+
+        print("datalength: ", len(allfiles))
         self.allfiles = allfiles
 
 
