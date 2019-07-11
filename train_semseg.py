@@ -68,7 +68,15 @@ vis_loader = torch.utils.data.DataLoader(
 data_vis = next(iter(vis_loader))
 '''
 # Model
-model = config.get_model({"method": "onet"}, device=device, dataset=train_dataset)
+model = config.get_model({
+    "method": "onet",
+    "model":
+      "encoder_latent": null,
+      "decoder": cbatchnorm,
+      "encoder": voxel_simple,
+      "c_dim": 256,
+      "z_dim": 0    
+    }, device=device, dataset=train_dataset)
 '''
 # Intialize training
 npoints = 1000
