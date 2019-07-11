@@ -39,6 +39,7 @@ class ToTensor(object):
         # torch image: C x D x H x W
         image = image.transpose((2, 0, 1))
         image = torch.from_numpy(image.astype('int32'))
+        print(image)
         return image
 
 
@@ -104,5 +105,3 @@ class CropZCenter3D(object):
         image = image[:, :, z_diff:z_diff + self.center_size]
 
         return image
-
-
