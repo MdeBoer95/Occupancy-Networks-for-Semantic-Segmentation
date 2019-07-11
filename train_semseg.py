@@ -71,11 +71,13 @@ data_vis = next(iter(vis_loader))
 model = config.get_model({
     "method": "onet",
     "model":
+      {
       "encoder_latent": null,
       "decoder": cbatchnorm,
       "encoder": voxel_simple,
       "c_dim": 256,
-      "z_dim": 0    
+      "z_dim": 0
+      }
     }, device=device, dataset=train_dataset)
 '''
 # Intialize training
