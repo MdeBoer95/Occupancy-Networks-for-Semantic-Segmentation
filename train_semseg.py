@@ -50,12 +50,12 @@ train_dataset = ct.CTImagesDataset(root)
 #val_dataset = ct.CTImagesDataset(root,'val')
 
 #val_dataset = config.get_dataset('val', cfg)
-for x in train_dataset:
-    print(x)
+print("Started loading trainer...")
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=batch_size, num_workers=4, shuffle=True,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
+print("Done!")
 '''
 val_loader = torch.utils.data.DataLoader(
     val_dataset, batch_size=10, num_workers=4, shuffle=False,
