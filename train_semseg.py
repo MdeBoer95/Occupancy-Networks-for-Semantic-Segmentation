@@ -24,7 +24,22 @@ args = parser.parse_args()
 #cfg = config.load_config(args.config, 'configs/default.yaml')
 is_cuda = (torch.cuda.is_available() and not args.no_cuda)
 device = torch.device("cuda" if is_cuda else "cpu")
-
+cfg = {
+"method": "onet",
+"model":
+  {
+  "encoder_latent": "null",
+  "decoder": "cbatchnorm",
+  "encoder": "voxel_simple",
+  "c_dim": 256,
+  "z_dim": 0
+  },
+  "data":
+    {
+    "dim": 3,
+    "points_subsample": 1024
+    }
+}
 # Set t0
 t0 = time.time()
 
@@ -68,17 +83,7 @@ vis_loader = torch.utils.data.DataLoader(
 data_vis = next(iter(vis_loader))
 '''
 # Model
-model = config.get_model({
-    "method": "onet",
-    "model":
-      {
-      "encoder_latent": "null",
-      "decoder": "cbatchnorm",
-      "encoder": "voxel_simple",
-      "c_dim": 256,
-      "z_dim": 0
-      }
-    }, device=device, dataset=train_dataset)
+model = config.get_model(cfg, device=device, dataset=train_dataset)
 '''
 # Intialize training
 npoints = 1000
