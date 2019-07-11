@@ -36,7 +36,7 @@ cfg = {
   "decoder_kwargs": {},
   "encoder_kwargs": {},
   "encoder_latent_kwargs": {},
-  "multi_gpu": false,
+  "multi_gpu": "false",
   "c_dim": 512,
   "z_dim": 64,
   "use_camera": "false",
