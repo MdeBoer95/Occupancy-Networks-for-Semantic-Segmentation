@@ -1,7 +1,7 @@
 method: onet
 data:
   input_type: voxels
-  path: /visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/
+  path: /visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/
   dim: 3
   points_subsample: 1024
 model:
