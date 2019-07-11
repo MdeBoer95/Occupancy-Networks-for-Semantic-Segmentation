@@ -27,7 +27,7 @@ class CTImagesDataset(Dataset):
         # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
 
-        for sub_dir in self.sub_dirs:
+        for sub_dir in self.sub_dirs and len(allfiles) < 21:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename:
@@ -42,7 +42,7 @@ class CTImagesDataset(Dataset):
                     allfiles.append([image_filepath, label_filepaths])
 
         self.allfiles = allfiles
-        
+
 
     def __len__(self):
         return len(self.allfiles)
