@@ -51,6 +51,7 @@ class CTImagesDataset(Dataset):
         return len(self.allfiles)
 
     def __getitem__(self, idx):
+        print("loading item ", idx)
         image = load(self.allfiles[idx][0])[0]  # only take the image data, not the header
         image_shape = image.shape
 
