@@ -123,17 +123,18 @@ while True:
         it += 1
         loss = trainer.train_step(batch)
         logger.add_scalar('train/loss', loss, it)
-
+        print("I got here")
         # Print output
         if print_every > 0 and (it % print_every) == 0:
             print('[Epoch %02d] it=%03d, loss=%.4f'
                   % (epoch_it, it, loss))
+        print("I did it")          
         '''
         # Visualize output
         if visualize_every > 0 and (it % visualize_every) == 0:
             print('Visualizing')
             trainer.visualize(data_vis)
-         
+
         # Save checkpoint
         if (checkpoint_every > 0 and (it % checkpoint_every) == 0):
             print('Saving checkpoint')
