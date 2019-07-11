@@ -48,28 +48,28 @@ train_dataset = ct.CTImagesDataset(root)
 #val_dataset = ct.CTImagesDataset(root,'val')
 
 #val_dataset = config.get_dataset('val', cfg)
-'''
+
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=batch_size, num_workers=4, shuffle=True,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
-
+'''
 val_loader = torch.utils.data.DataLoader(
     val_dataset, batch_size=10, num_workers=4, shuffle=False,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
-
-
+'''
+'''
 # For visualizations
 vis_loader = torch.utils.data.DataLoader(
     val_dataset, batch_size=12, shuffle=True,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
 data_vis = next(iter(vis_loader))
-
+'''
 # Model
-model = config.get_model(cfg, device=device, dataset=train_dataset)
-
+model = config.get_model({"method": "onet"}, device=device, dataset=train_dataset)
+'''
 # Intialize training
 npoints = 1000
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
