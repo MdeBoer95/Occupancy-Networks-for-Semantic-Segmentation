@@ -21,8 +21,8 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
                 if fnmatch.fnmatch(file, '*.mha') and not fnmatch.fnmatch(file, '*label*'):
                         path = root + '/' + dir + '/' + file
                         data, header = load(path)
-                        # Rename, if too big
-                        if data.shape[2] > 1000:
+                        # Rename, if too big and not flagged already
+                        if data.shape[2] > 1000 and not fnmatch.fnmatch(file, '*_big*'):
                                 os.rename(path, path[:-4]+'_big'+ path[-4:])
                                 break
         break
