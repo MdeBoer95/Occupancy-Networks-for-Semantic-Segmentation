@@ -23,9 +23,8 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
                         data, header = load(path)
                         # Rename, if too big
                         if data.shape[2] > 1000:
-                                #os.rename(path, )
-                                print(path[:-4]+'big'+ path[-4:])
-                        break
+                                os.rename(path, path[:-4]+'_big'+ path[-4:])
+                                break
         break
 end = time.time()
 print('runtime:',end - start)
