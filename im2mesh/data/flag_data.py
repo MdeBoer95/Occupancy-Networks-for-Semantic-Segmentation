@@ -19,9 +19,12 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
         for file in os.listdir(dir):
                 # Fetch dimensions of image
                 if fnmatch.fnmatch(file, '*.mha') and not fnmatch.fnmatch(file, '*label*'):
-                        #print(root + '/' + dir + '/' + file)
-                        data, header = load(root + '/' + dir + '/' + file)
-                        print(data.shape[2])
+                        path = root + '/' + dir + '/' + file
+                        data, header = load(path)
+                        # Rename, if too big
+                        if data.shape[2] > 1000:
+                                #os.rename(path, )
+                                print(path[:-4])
                         break
         break
 end = time.time()
