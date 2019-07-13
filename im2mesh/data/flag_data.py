@@ -28,9 +28,10 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
                                 os.rename(path, path[:-8]+'_big'+ path[-4:])
                                 flag = False
                                 print('interrupt please')
-                        if data.shape[2] > 1000 and not fnmatch.fnmatch(file, '*_big*') and flag:
-                                os.rename(path, path[:-8]+'_big'+ path[-4:])
+                        if data.shape[2] > 1000 and flag:
                                 print('too big: ',path)
+                                os.rename(path, path[:-8]+'_big'+ path[-4:])
+                                print('rename: ',path[:-8]+'_big'+ path[-4:])
 
 end = time.time()
 print('runtime:',end - start)
