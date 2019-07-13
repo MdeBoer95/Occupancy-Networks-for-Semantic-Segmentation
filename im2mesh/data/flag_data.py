@@ -20,10 +20,14 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
                 # Fetch dimensions of image
                 if fnmatch.fnmatch(file, '*.mha') and not fnmatch.fnmatch(file, '*label*'):
                         path = root + '/' + dir + '/' + file
+                        ending = '/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503//12-45-550-12/BAGGAGE_20180913_102913_126581.mha'
                         data, header = load(path)
                         # Rename, if too big and not flagged already
+                        if path == ending or path == (ending[:-4]+'_big'+ ending[-4:]):
+                                os.rename(path, path[:-8]+'_big'+ path[-4:])
+                                print('interrupt please')
                         if data.shape[2] > 1000 and not fnmatch.fnmatch(file, '*_big*'):
-                                os.rename(path, path[:-4]+'_big'+ path[-4:])
+                                os.rename(path, path[:-8]+'_big'+ path[-4:])
                                 print('too big: ',path)
 
 end = time.time()
