@@ -10,7 +10,8 @@ import numpy as np
 
 start = time.time()
 # Descend to dataset
-os.chdir('/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/')
+root = '/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/'
+os.chdir(root)
 
 # Iterate through directories and files of dataset
 for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
@@ -18,7 +19,7 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
         for file in os.listdir(dir):
                 # Fetch metadata of image
                 if fnmatch.fnmatch(file, '*.mha') and not fnmatch.fnmatch(file, '*label*'):
-                        print(dir + file)
+                        print(root + '/' + dir + '/' + file)
                         #meta = load(dirfile)
 
                         break
