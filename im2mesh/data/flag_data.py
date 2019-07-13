@@ -23,15 +23,5 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
 
                         break
         break
-
-
-
-# Save data to csv file
-#np.savetxt("data_info.csv", np.column_stack((x_dim,y_dim,z_dim)), delimiter=",", fmt='%s', header = 'data')
 end = time.time()
 print('runtime:',end - start)
-#print('max x:', max(x_dim))
-#print('max y:', max(y_dim))
-#print('max z:', max(z_dim))
-#print('number of images:', len(x_dim))
-print(nr_pic)
