@@ -24,6 +24,7 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
                         # Rename, if too big
                         if data.shape[2] > 1000:
                                 #os.rename(path, )
+                                print(path)
                                 print(path[:-4])
                         break
         break
