@@ -19,9 +19,9 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
         for file in os.listdir(dir):
                 # Fetch metadata of image
                 if fnmatch.fnmatch(file, '*.mha') and not fnmatch.fnmatch(file, '*label*'):
-                        print(root + '/' + dir + '/' + file)
-                        #meta = load(dirfile)
-
+                        #print(root + '/' + dir + '/' + file)
+                        meta = load(root + '/' + dir + '/' + file)
+                        print(meta)
                         break
         break
 end = time.time()
