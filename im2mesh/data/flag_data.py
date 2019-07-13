@@ -21,7 +21,8 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
                 if fnmatch.fnmatch(file, '*.mha') and not fnmatch.fnmatch(file, '*label*'):
                         #print(root + '/' + dir + '/' + file)
                         meta = load(root + '/' + dir + '/' + file)
-                        print(meta)
+                        for x in meta:
+                                print(x)
                         break
         break
 end = time.time()
