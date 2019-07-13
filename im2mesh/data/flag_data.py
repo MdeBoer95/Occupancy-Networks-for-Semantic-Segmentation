@@ -1,6 +1,6 @@
 import os
 import fnmatch
-from medpy.io import load
+from medpy.io import header
 import itk
 import inspect
 import time
@@ -20,7 +20,7 @@ for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
                 # Fetch metadata of image
                 if fnmatch.fnmatch(file, '*.mha') and not fnmatch.fnmatch(file, '*label*'):
                         #print(root + '/' + dir + '/' + file)
-                        meta = load(root + '/' + dir + '/' + file)
+                        meta = header(root + '/' + dir + '/' + file)
                         for x in meta:
                                 print(x)
                         break
