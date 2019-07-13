@@ -1,6 +1,6 @@
 import os
 import fnmatch
-from medpy.io import header
+from medpy.io import load
 import itk
 import inspect
 import time
@@ -17,12 +17,11 @@ os.chdir(root)
 for dir in [x for x in os.listdir('.') if os.path.isdir(os.path.join('.', x))]:
         # For each file in the subdirectories of the data set
         for file in os.listdir(dir):
-                # Fetch metadata of image
+                # Fetch dimensions of image
                 if fnmatch.fnmatch(file, '*.mha') and not fnmatch.fnmatch(file, '*label*'):
                         #print(root + '/' + dir + '/' + file)
-                        meta = header(root + '/' + dir + '/' + file)
-                        for x in meta:
-                                print(x)
+                        data, header = load(root + '/' + dir + '/' + file)
+                        print(data.shape)
                         break
         break
 end = time.time()
