@@ -21,7 +21,6 @@ class CTImagesDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        print("Started loading data")
         self.root_dir = root_dir
         # Only get name, if directory
         self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
@@ -29,6 +28,7 @@ class CTImagesDataset(Dataset):
         allfiles = []
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
+            #TODO: remove this 'if' later
             if(len(allfiles) > 9):
                 break
             for filename in sub_dir_files:
@@ -43,7 +43,6 @@ class CTImagesDataset(Dataset):
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
 
-        print("datalength: ", len(allfiles))
         self.allfiles = allfiles
 
 
@@ -51,7 +50,6 @@ class CTImagesDataset(Dataset):
         return len(self.allfiles)
 
     def __getitem__(self, idx):
-        print("loading item ", idx)
         image = load(self.allfiles[idx][0])[0]  # only take the image data, not the header
         image_shape = image.shape
 
@@ -66,15 +64,15 @@ class CTImagesDataset(Dataset):
             # crop center 512 of z dim
             transformations.insert(0, ct_transforms.CropZCenter3D(512))
         # compose all transformations to one
-        composed_transform = torchvision.transforms.Compose(transformations)
+        image_transform = torchvision.transforms.Compose(transformations)
+        label_transform = torchvision.transforms.Compose(transformations[0:-1])  # do not downscale the labels
 
-        image = composed_transform(image)
-        labels = [composed_transform(label) for label in labels]
+        image = image_transform(image)
+        labels = [label_transform(label) for label in labels]
 
         points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024)
 
         sample = {'points': points, 'points.occ': points_occ, 'inputs': image}
-        print(sample)
         return sample
 
 
@@ -107,33 +105,65 @@ class CTImagesDataset(Dataset):
         :param num_points: the number of points to draw in total
         :return: a list of x,y,z coordinate pairs with length num_points
         """
-        # find x,y,z coords that are inside the bounding box. We look for 'planes' in x,y,z direction that contain
-        # not only 0s.
+
         num_labels = len(label_masks)
-        points_per_label = num_points // num_labels  # points per label
+        points_per_label = num_points//num_labels  # points per label
         rest = num_points - points_per_label * num_labels  # if not possible to distribute equally, draw the remaining
-        # ones from the first bounding box
+                                                           # ones from the first bounding box
         points_per_label = [points_per_label for _ in range(num_labels)]
 
         points_per_label[0] += rest
 
-        for i, label_mask in enumerate(label_masks):
-            x_idxs = [x for x in range(label_mask.shape[0]) if np.sum(label_mask[x, :, :]) != 0]
-            y_idxs = [y for y in range(label_mask.shape[1]) if np.sum(label_mask[:, y, :]) != 0]
-            z_idxs = [z for z in range(label_mask.shape[2]) if np.sum(label_mask[:, :, z]) != 0]
+        def sample_points(num_points, limit_tuple):
+            """
+            sample random real values in the ranges given by the 'limit-tuple'
+            :param num_points: number of point to sample
+            :param limit_tuple: 6 - tuple of limits for all dimensions (x_min, x_max, y_min, y_max, z_min, z_max)
+            :return:
+            """
+            x_koords = np.round(np.random.uniform(low=limit_tuple[0], high=limit_tuple[1], size=(num_points, 1)), 3)
+            y_koords = np.round(np.random.uniform(low=limit_tuple[2], high=limit_tuple[3], size=(num_points, 1)), 3)
+            z_koords = np.round(np.random.uniform(low=limit_tuple[4], high=limit_tuple[5], size=(num_points, 1)), 3)
+            points_xyz = np.hstack((x_koords, y_koords, z_koords))
+            return points_xyz
 
-            # gather all possible combinations and sample num_points points
-            points_xyz = [x_idxs, y_idxs, z_idxs]
-            bounding_box_points = list(itertools.product(*points_xyz))
-            num_samples = points_per_label[i]
-            if num_samples > len(bounding_box_points):
-                num_samples = len(bounding_box_points)
-            sampled_points = random.sample(bounding_box_points, num_samples)
-            # get label for each point
-            labels = []
-            for sample in sampled_points:
-                labels.append(label_mask[sample])
-        return np.array(sampled_points), np.array(labels)
+        def lookup_occ(label_mask, points):
+            """
+            look up occupancy value at nearest neighbour for each given point
+            :return: occupancy values for points
+            """
+            nearest_points = np.round(points).astype(int)
+            occ_val = label_mask[nearest_points[:,0], nearest_points[:, 1], nearest_points[:,2]]
+            return occ_val
+
+        def recover_boundingbox(label_mask):
+            """
+            Get dimensions of bounding box in full scale label mask
+            :return: 6 tuple with start and end of the bounding box in each dimension
+            """
+            x_idxs = [x for x in range(label_mask.shape[0]) if np.sum(label_mask[x, :, :]) != 0]
+            x_low, x_high = min(x_idxs), max(x_idxs) + 1
+            y_idxs = [y for y in range(label_mask.shape[1]) if np.sum(label_mask[:, y, :]) != 0]
+            y_low, y_high = min(y_idxs), max(y_idxs) + 1
+            z_idxs = [z for z in range(label_mask.shape[2]) if np.sum(label_mask[:, :, z]) != 0]
+            z_low, z_high = min(z_idxs), max(z_idxs) + 1
+
+            return x_low, x_high, y_low, y_high, z_low, z_high
+
+        # sample points from each bounding box
+        all_points = np.array([np.inf, np.inf, np.inf]).reshape(1,3)  # remove dummy entry later
+        all_occ = np.array([np.inf]).reshape(1,)  # remove dummy entry later
+        # sample points and occ values for each bounding box/ label
+        for i, label_mask in enumerate(label_masks):
+            bounding_box_limits = recover_boundingbox(label_mask)
+            points = sample_points(points_per_label[i], bounding_box_limits)
+            occ = lookup_occ(label_mask, points)
+            all_points = np.vstack((all_points, points))
+            all_occ = np.append(all_occ, occ)
+
+        all_points = all_points[1:, :]
+        all_occ = all_occ[1:]
+        return all_points, all_occ
 
 
 if __name__ == '__main__':

@@ -101,7 +101,9 @@ class CropZCenter3D(object):
         if z_diff < 0:
             raise ValueError("Image dimension is smaller than the center size")
 
+        offset = z_diff // 2
+
         # crop 'center' X x Y x center_size pixels of the image.
-        image = image[:, :, z_diff:z_diff + self.center_size]
+        image = image[:, :, offset:offset + self.center_size]
 
         return image
