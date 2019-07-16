@@ -61,6 +61,8 @@ train_loader = torch.utils.data.DataLoader(
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
 
+print(len(train_loader.dataset))
+
 
 # Loader for val_dataset
 val_loader = torch.utils.data.DataLoader(
