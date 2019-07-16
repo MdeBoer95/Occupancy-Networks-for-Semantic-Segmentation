@@ -69,8 +69,10 @@ class CTImagesDataset(Dataset):
 
         image = image_transform(image)
         labels = [label_transform(label) for label in labels]
+        print(type(points))
 
         sample = {'points': points.astype(float), 'points.occ': points_occ.astype(float), 'inputs': image}
+        print(type(points.astype(float)[0][0]))
         return sample
 
 
