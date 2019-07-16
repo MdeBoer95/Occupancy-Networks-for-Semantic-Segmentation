@@ -71,10 +71,10 @@ class CTImagesDataset(Dataset):
         labels = [label_transform(label) for label in labels]
 
         points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024)
-        
 
-        sample = {'points': points.astype(float), 'points.occ': points_occ.astype(float), 'inputs': image}
-        print(type(points.astype(float)[0][0]))
+
+        sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
+        print(type(points.astype('float32')[0][0]))
         return sample
 
 
