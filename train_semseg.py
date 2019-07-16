@@ -140,7 +140,7 @@ while True:
         if visualize_every > 0 and (it % visualize_every) == 0:
             print('Visualizing')
             trainer.visualize(data_vis)
-
+        '''
         # Save checkpoint
         if (checkpoint_every > 0 and (it % checkpoint_every) == 0):
             print('Saving checkpoint')
@@ -167,7 +167,7 @@ while True:
                 print('New best model (loss %.4f)' % metric_val_best)
                 checkpoint_io.save('model_best.pt', epoch_it=epoch_it, it=it,
                                    loss_val_best=metric_val_best)
-        '''
+        
         # Exit if necessary
         if exit_after > 0 and (time.time() - t0) >= exit_after:
             print('Time limit reached. Exiting.')
