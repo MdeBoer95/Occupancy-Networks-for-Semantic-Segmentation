@@ -29,7 +29,7 @@ class CTImagesDataset(Dataset):
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
             #Only for testing: remove this 'if' later
-            if(len(allfiles) > 9):
+            if(len(allfiles) > 63):
                 break
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename:
