@@ -72,7 +72,7 @@ class CTImagesDataset(Dataset):
 
         points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024)
 
-        sample = {'points': points, 'points.occ': points_occ.astype(float), 'inputs': image}
+        sample = {'points': points.astype(float), 'points.occ': points_occ.astype(float), 'inputs': image}
         return sample
 
 

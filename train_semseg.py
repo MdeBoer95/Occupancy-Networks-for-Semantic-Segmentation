@@ -54,7 +54,7 @@ train_length = math.floor(0.7*dataset_length)
 val_length = math.ceil(0.1*dataset_length)
 test_length = math.floor(0.2*dataset_length)
 train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [train_length, val_length, test_length])
-print(train_dataset[0])
+
 # Loader for train_dataset
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=batch_size, num_workers=4, shuffle=True,
