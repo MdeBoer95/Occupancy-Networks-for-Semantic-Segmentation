@@ -74,7 +74,7 @@ class CTImagesDataset(Dataset):
 
 
         sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
-        print(type(points.astype('float32')[0][0]))
+        
         return sample
 
 
