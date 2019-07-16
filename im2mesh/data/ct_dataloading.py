@@ -50,7 +50,7 @@ class CTImagesDataset(Dataset):
         return len(self.allfiles)
 
     def __getitem__(self, idx):
-        image = load(self.allfiles[idx][0])[0].astype(float)  # only take the image data, not the header
+        image = load(self.allfiles[idx][0])[0].astype('float32')  # only take the image data, not the header
         image_shape = image.shape
 
         mha_labels = []
@@ -74,7 +74,6 @@ class CTImagesDataset(Dataset):
 
 
         sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
-        
         return sample
 
 
