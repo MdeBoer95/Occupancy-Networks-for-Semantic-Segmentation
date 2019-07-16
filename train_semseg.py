@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optim
+from torch.utils.data import Dataset as ds
 from tensorboardX import SummaryWriter
 import numpy as np
 import os
@@ -10,6 +11,8 @@ from im2mesh import config, data
 from im2mesh.checkpoints import CheckpointIO
 import im2mesh.data.ct_dataloading as ct
 import json
+import math
+
 
 
 # Arguments
@@ -44,9 +47,15 @@ model_selection_sign = 1
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
-# Dataset
-# TODO
-train_dataset = ct.CTImagesDataset(root)
+# Split dataset
+# 70% train, 20% val, 10% test
+dataset = ct.CTImagesDataset(root)
+dataset_length = len(dataset)
+train_length = math.floor(0.7*dataset_length)
+val_length = math.floor(0.2*dataset_length)
+test_length = math.floor(0.1*dataset_length)
+print(" train: ",train_length, "\n val: ",val_length,"\n test: ",test_length)
+train_dataset, val_dataset, test_dataset = ds.random_split(dataset, [train_length, val_length, test_length])
 #val_dataset = ct.CTImagesDataset(root,'val')
 
 #val_dataset = config.get_dataset('val', cfg)
