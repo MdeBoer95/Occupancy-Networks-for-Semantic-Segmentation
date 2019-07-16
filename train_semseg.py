@@ -50,28 +50,23 @@ if not os.path.exists(out_dir):
 # 70% train, 20% val, 10% test
 dataset = ct.CTImagesDataset(root)
 dataset_length = len(dataset)
-print(dataset_length)
 train_length = math.floor(0.7*dataset_length)
 val_length = math.floor(0.2*dataset_length)
 test_length = math.ceil(0.1*dataset_length)
-print(" train: ",train_length, "\n val: ",val_length,"\n test: ",test_length)
 train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [train_length, val_length, test_length])
-print("Train ds: ", train_dataset[0])
-#val_dataset = ct.CTImagesDataset(root,'val')
 
-#val_dataset = config.get_dataset('val', cfg)
-print("Started loading trainer...")
+# Loader for train_dataset
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=batch_size, num_workers=4, shuffle=True,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
-print("Done!")
-'''
+
+
+# Loader for val_dataset
 val_loader = torch.utils.data.DataLoader(
     val_dataset, batch_size=10, num_workers=4, shuffle=False,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
-'''
 '''
 # For visualizations
 vis_loader = torch.utils.data.DataLoader(
