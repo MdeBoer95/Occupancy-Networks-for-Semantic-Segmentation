@@ -1,6 +1,6 @@
 import torch
 import torch.optim as optim
-from torch.utils.data import Dataset as ds
+import torch.utils.data as torch_data
 from tensorboardX import SummaryWriter
 import numpy as np
 import os
@@ -28,7 +28,6 @@ args = parser.parse_args()
 cfg = config.load_config('configs/semseg/onet.yaml', 'configs/default.yaml')
 is_cuda = (torch.cuda.is_available() and not args.no_cuda)
 device = torch.device("cuda" if is_cuda else "cpu")
-print(device)
 
 # Set t0
 t0 = time.time()
@@ -55,7 +54,8 @@ train_length = math.floor(0.7*dataset_length)
 val_length = math.floor(0.2*dataset_length)
 test_length = math.floor(0.1*dataset_length)
 print(" train: ",train_length, "\n val: ",val_length,"\n test: ",test_length)
-train_dataset, val_dataset, test_dataset = ds.random_split(dataset, [train_length, val_length, test_length])
+train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [train_length, val_length, test_length])
+print("Train ds: ", train_dataset[0])
 #val_dataset = ct.CTImagesDataset(root,'val')
 
 #val_dataset = config.get_dataset('val', cfg)
