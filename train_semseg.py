@@ -50,6 +50,7 @@ if not os.path.exists(out_dir):
 # 70% train, 20% val, 10% test
 dataset = ct.CTImagesDataset(root)
 dataset_length = len(dataset)
+print(dataset_length)
 train_length = math.floor(0.7*dataset_length)
 val_length = math.floor(0.2*dataset_length)
 test_length = math.floor(0.1*dataset_length)
