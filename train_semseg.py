@@ -47,14 +47,14 @@ if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
 # Split dataset
-# 70% train, 20% val, 10% test
+# 70% train, 10% val, 20% test
 dataset = ct.CTImagesDataset(root)
 dataset_length = len(dataset)
 train_length = math.floor(0.7*dataset_length)
-val_length = math.floor(0.2*dataset_length)
-test_length = math.ceil(0.1*dataset_length)
+val_length = math.ceil(0.1*dataset_length)
+test_length = math.floor(0.2*dataset_length)
 train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [train_length, val_length, test_length])
-
+print(train_dataset[0])
 # Loader for train_dataset
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=batch_size, num_workers=4, shuffle=True,
@@ -167,7 +167,7 @@ while True:
                 print('New best model (loss %.4f)' % metric_val_best)
                 checkpoint_io.save('model_best.pt', epoch_it=epoch_it, it=it,
                                    loss_val_best=metric_val_best)
-        
+
         # Exit if necessary
         if exit_after > 0 and (time.time() - t0) >= exit_after:
             print('Time limit reached. Exiting.')
