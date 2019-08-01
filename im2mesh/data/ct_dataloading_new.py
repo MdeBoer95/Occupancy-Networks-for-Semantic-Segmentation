@@ -67,7 +67,7 @@ class CTImagesDataset(Dataset):
         # compose all transformations to one
         image_transform = torchvision.transforms.Compose(transformations)
         # Change here
-        label_transform = torchvision.transforms.Compose(transformations[0:-1])  # do not downscale the labels
+        # label_transform = torchvision.transforms.Compose(transformations[0:-1])  # do not downscale the labels
 
         image = image_transform(image)
         labels = determine_bounding_boxes(image_shape, mha_labels)
@@ -79,35 +79,34 @@ class CTImagesDataset(Dataset):
         return sample
 
     # Determine bounding boxes
-    def determine_bounding_boxes(shape, label_list):
+    def determine_bounding_boxes(image_shape, label_list):
         # Copy labels
         labels = label_list.copy()
         # Change offsets and label boxes, if necessary
 
         if shape[2]> 512:
             # Image will be cropped from center
-            center = shape[2] // 2
-            change = (shape[2] - 512) // 2
+            image_z_center = shape[2] // 2
+            # Z-offset changes by the following amount
+            image_z_offset = (shape[2] - 512) // 2
+            
             # List for labels that will be removed
             remove = []
             for label in labels:
-                z_offset = int(round(label[1].offset[2] / label[1].voxel_spacing[2]))
+                # Divide by voxelspacing to get index
+                voxel_spacing = label[1].voxel_spacing[2]
+                z_offset = int(round(label[1].offset[2] / voxel_spacing))
                 z_label_size = label[0].shape[2]
-                begin = center - 256
-                end = center + 256
-                # First case: label box is not in the cropped image anymore
-                if (z_offset > end) or (z_offset + z_label_size) < begin:
+                z_begin = image_z_center - 256
+                z_end = image_z_center + 256
+                # First case: label is completely inside the cropped image
+                if (z_offset > z_begin and (z_offset + z_label_size) < z_end):
+                    # Offset needs to change:
+                    label[1].offset[2] = (z_offset + image_z_offset) * voxel_spacing
+                # Remove all other labels
+                else:                    
                     remove.append(label)
-                # Second case: A part of the label box is outside of the new image
-                # At the beginning
-                elif ((z_offset < begin) and (z_offset + z_label_size > begin)):
-                    label = crop_label(label, begin, "left")
-                # At the end
-                elif ((z_offset < end) and (z_offset + z_label_size > end)):
-                    label = crop_label(label, end, "right")
-                # Third case: Label is completely inside of the cropped image
-                else:
-                    label[1].offset[2] = z_offset + change
+                
             # Remove labels from list
             if len(remove) > 0:
                 labels = [x for x in labels if x not in remove]
@@ -116,64 +115,22 @@ class CTImagesDataset(Dataset):
             change = (512 - shape[2]) // 2
             # Add change to offsets
             for label in labels:
-                label[1].offset[2] = label[1].offset[2] + change
+                voxel_spacing = label[1].voxel_spacing[2]
+                label[1].offset[2] = ((label[1].offset[2] / voxel_spacing) + change) * voxel_spacing
 
-        return labels
-
-    # Crop labels
-    def crop_label(label, border, where):
-        # Fix offset
-        z_offset = int(round(label[1].offset[2] / label[1].voxel_spacing[2]))
-        size = label[0].shape[2]
-        if (z_offset < border) and (border < (z_offset + label[0].shape[2])):
-            # first case: crop only left side of label
-            if (where == "left"):
-                label[0] = label[0][:,:,z_offset-1:-1]
-                label[1].offset[2] = border
-
-            # second case: crop only right side of the label
-            elif (where == "right"):
-                label[0] = label[0][:,:,0:border]
-
-        else:
-            raise ValueError("Conditions for label cropping not met")
-
-        return label
-
-
-
-    # Delete
-    def _load_label_masks(self, mha_label_list, mask_size):
-        expanded_masks = []
-        for mha_label in mha_label_list:
-            label_box = mha_label[0]
-            label_offsets = mha_label[1].offset
-            label_mask = np.zeros(mask_size, dtype=np.int)
-            # expand the labels to the full size (same size as the image)
-            label_mask[int(label_offsets[0]):int(label_offsets[0] + label_box.shape[0]),
-            int(-label_offsets[1]):int(-label_offsets[1] + label_box.shape[1]),
-            int(label_offsets[2]):int(label_offsets[2] + label_box.shape[2])] = label_box
-            expanded_masks.append(label_mask)
-        return expanded_masks
-
-    # Delete
-    def _merge_labelmasks(self, labelmasks):
-        mask_size = labelmasks[0].shape
-        merged_masks = np.zeros(mask_size, dtype=np.int)
-        for mask in labelmasks:
-            merged_masks = np.bitwise_or(merged_masks, mask)
-        return merged_masks
+        return labels 
+   
 
     # label_masks
-    def _sample_points_inside_boundingboxes(self, label_masks, num_points):
+    def _sample_points_inside_boundingboxes(self, labels, num_points):
         """
         Sample a given number of points from the bounding box of an object.
-        :param label_mask: list of label masks for the objects inside the ct image
+        :param labels: list of labels with new offset for the objects inside the ct image
         :param num_points: the number of points to draw in total
         :return: a list of x,y,z coordinate pairs with length num_points
         """
 
-        num_labels = len(label_masks)
+        num_labels = len(labels)
         points_per_label = num_points//num_labels  # points per label
         rest = num_points - points_per_label * num_labels  # if not possible to distribute equally, draw the remaining
                                                            # ones from the first bounding box
@@ -194,38 +151,47 @@ class CTImagesDataset(Dataset):
             points_xyz = np.hstack((x_koords, y_koords, z_koords))
             return points_xyz
 
-        def lookup_occ(label_mask, points):
+        def lookup_occ(label, points):
             """
             look up occupancy value at nearest neighbour for each given point
             :return: occupancy values for points
             """
             nearest_points = np.round(points).astype(int)
             # we need
-            occ_val = label_mask[nearest_points[:,0], nearest_points[:, 1], nearest_points[:,2]]
+            # Label offset:
+            x_offset = label[1].offset[0] 
+            y_offset = label[1].offset[1] 
+            z_offset = int(round(label[1].offset[2] / voxel_spacing))  
+            occ_val = label[nearest_points[:,0], nearest_points[:, 1], nearest_points[:,2]]
             return occ_val
         # change
-        def recover_boundingbox(label_mask):
+        def recover_boundingbox(label):
             """
-            Get dimensions of bounding box in full scale label mask
+            Get dimensions of bounding box from label
             :return: 6 tuple with start and end of the bounding box in each dimension
             """
-            x_idxs = [x for x in range(label_mask.shape[0]) if np.sum(label_mask[x, :, :]) != 0]
+            shape = label.shape
+            x_offset = label[1].offset[0] 
+            y_offset = label[1].offset[1] 
+            z_offset = int(round(label[1].offset[2] / voxel_spacing)) 
+
+            x_idxs = [x for x in range(shape[0]) if np.sum(label[x, :, :]) != 0]
             x_low, x_high = min(x_idxs), max(x_idxs) + 1
-            y_idxs = [y for y in range(label_mask.shape[1]) if np.sum(label_mask[:, y, :]) != 0]
+            y_idxs = [y for y in range(shape[1]) if np.sum(label[:, y, :]) != 0]
             y_low, y_high = min(y_idxs), max(y_idxs) + 1
-            z_idxs = [z for z in range(label_mask.shape[2]) if np.sum(label_mask[:, :, z]) != 0]
+            z_idxs = [z for z in range(shape[2]) if np.sum(label[:, :, z]) != 0]
             z_low, z_high = min(z_idxs), max(z_idxs) + 1
 
-            return x_low, x_high, y_low, y_high, z_low, z_high
+            return x_low + x_offset, x_high + x_offset, y_low + y_offset, y_high + y_offset, z_low + z_offset, z_high + z_offset
 
         # sample points from each bounding box
         all_points = np.array([np.inf, np.inf, np.inf]).reshape(1,3)  # remove dummy entry later
         all_occ = np.array([np.inf]).reshape(1,)  # remove dummy entry later
         # sample points and occ values for each bounding box/ label
-        for i, label_mask in enumerate(label_masks):
-            bounding_box_limits = recover_boundingbox(label_mask)
+        for i, label in enumerate(labels):
+            bounding_box_limits = recover_boundingbox(label)
             points = sample_points(points_per_label[i], bounding_box_limits)
-            occ = lookup_occ(label_mask, points)
+            occ = lookup_occ(label, points)
             all_points = np.vstack((all_points, points))
             all_occ = np.append(all_occ, occ)
 
