@@ -107,7 +107,7 @@ class CTImagesDataset(Dataset):
             for label in label_list:
 
                 # Voxelspacing for z_dim
-                voxel_spacing = label[1].voxel_spacing[2]
+                voxel_spacing = label[1].get_voxel_spacing[2]
                 # Offset changes:
                 y_offset = y_max - label[1].offset[1]
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
@@ -127,7 +127,7 @@ class CTImagesDataset(Dataset):
             # Add change to offsets
             for label in label_list:
                 # Voxelspacing for z_dim
-                voxel_spacing = label[1].voxel_spacing[2]
+                voxel_spacing = label[1].get_voxel_spacing[2]
                 # Offset changes:
                 y_offset = y_max - label[1].offset[1]
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
