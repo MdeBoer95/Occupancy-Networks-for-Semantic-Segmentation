@@ -113,7 +113,7 @@ class CTImagesDataset(Dataset):
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
 
                 #If label is completely inside the cropped image
-                if z_offset > begin and (z_offset + label[0].shape[2]) < z_end:
+                if z_offset > begin and (z_offset + label[0].shape[2]) < end:
                     # Offset change:
                     offset = [label[1].offset[0] + x_pad, y_offset + y_pad, z_offset + z_diff]
                     offsets_and_labels.append((offset, label))
