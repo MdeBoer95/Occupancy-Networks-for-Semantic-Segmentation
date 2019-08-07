@@ -74,6 +74,8 @@ class CTImagesDataset(Dataset):
 
         sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
         return sample
+	
+
 
     # Determine bounding boxes
     def determine_offsets(self, shape, label_list, z):
@@ -103,19 +105,21 @@ class CTImagesDataset(Dataset):
             end = z_diff + z
 
             # List for labels that will be removed
-            remove = []
+            # remove = []
             for label in label_list:
 
                 # Voxelspacing for z_dim
                 voxel_spacing = label[1].get_voxel_spacing()[2]
                 # Offset changes:
-                y_offset = y_max - label[1].offset[1]
+		# Y is inverted !!!
+                y_offset = label[1].offset[1]
+		# Implement warning 
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
 
                 #If label is completely inside the cropped image
                 if z_offset > begin and (z_offset + label[0].shape[2]) < end:
                     # Offset change:
-                    offset = [label[1].offset[0] + x_pad, y_offset + y_pad, z_offset + z_diff]
+                    offset = [label[1].offset[0] + x_pad, y_offset - y_pad, z_offset + z_diff]
                     offsets_and_labels.append((offset, label))
                 # Else: label will be not be appended, counter for discarded labels increases
                 else:
@@ -129,9 +133,9 @@ class CTImagesDataset(Dataset):
                 # Voxelspacing for z_dim
                 voxel_spacing = label[1].get_voxel_spacing()[2]
                 # Offset changes:
-                y_offset = y_max - label[1].offset[1]
+                y_offset = label[1].offset[1]
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
-                offset = [label[1].offset[0] + x_pad, y_offset + y_pad, z_offset + z_pad]
+                offset = [label[1].offset[0] + x_pad, y_offset - y_pad, z_offset + z_pad]
                 offsets_and_labels.append((offset, label))
 
         return offsets_and_labels, discarded
@@ -174,9 +178,11 @@ class CTImagesDataset(Dataset):
             :param points: list of points to look up inside the label
             :return: occupancy values for points
             """
+	    # Y is inverted !!!
             # Label offset:
             offset = label[0]
             # List of nearest points, subtract offset from points to lookup point in label:
+	    # Change for y: x - offset, z - offset, y + offset?
             nearest_points = [np.subtract(point, offset) for point in np.round(points).astype(int)]
             # Look up occupancy values of points
             return label[1][0][nearest_points[:,0], nearest_points[:, 1], nearest_points[:,2]]
