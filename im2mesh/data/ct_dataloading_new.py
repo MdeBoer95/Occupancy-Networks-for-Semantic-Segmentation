@@ -76,7 +76,7 @@ class CTImagesDataset(Dataset):
         return sample
 
     # Determine bounding boxes
-    def determine_offsets(shape, label_list, z):
+    def determine_offsets(self, shape, label_list, z):
         """
         Determine the offset for each label so we can use these for indexing.
         The voxel spacing will not be taken into account for the new offset, but can be applied again via the label!
