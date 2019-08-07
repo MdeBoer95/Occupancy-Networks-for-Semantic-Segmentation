@@ -104,7 +104,7 @@ class CTImagesDataset(Dataset):
 
             # List for labels that will be removed
             remove = []
-            for label in labels:
+            for label in label_list:
 
                 # Voxelspacing for z_dim
                 voxel_spacing = label[1].voxel_spacing[2]
@@ -125,7 +125,7 @@ class CTImagesDataset(Dataset):
             # Calculate padding for z
             z_pad = (z - label[0].shape[2]) // 2
             # Add change to offsets
-            for label in labels:
+            for label in label_list:
                 # Voxelspacing for z_dim
                 voxel_spacing = label[1].voxel_spacing[2]
                 # Offset changes:
