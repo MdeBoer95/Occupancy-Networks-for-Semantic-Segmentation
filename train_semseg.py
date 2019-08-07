@@ -9,7 +9,7 @@ import time
 import matplotlib; matplotlib.use('Agg')
 from im2mesh import config, data
 from im2mesh.checkpoints import CheckpointIO
-import im2mesh.data.ct_dataloading as ct
+import im2mesh.data.ct_dataloading_new as ct
 import json
 import math
 
