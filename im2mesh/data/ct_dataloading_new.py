@@ -75,66 +75,66 @@ class CTImagesDataset(Dataset):
         sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
         return sample
 
-    # Determine bounding boxes
-    def determine_offsets(shape, label_list, z):
-        """
-        Determine the offset for each label so we can use these for indexing.
-        The voxel spacing will not be taken into account for the new offset, but can be applied again via the label!
-        Remove labels from list, if they are partially or completely out of the new cropped image
-        :param image_shape: the shape of the image (620, 420, z), determines if image is being cropped or padded
-        :param label_list: A list of labels for the corresponding image
-        :param z: Number that indicates
-        :return: list of tuples with tuples being (new offset, label), number of discarded labels
-        """
-        offsets_and_labels = []
-        discarded = 0
-        # x and y are fixed to 620, 420. Remember y, because offset y is inverted
-        y_max = 420
+        # Determine bounding boxes
+        def determine_offsets(shape, label_list, z):
+            """
+            Determine the offset for each label so we can use these for indexing.
+            The voxel spacing will not be taken into account for the new offset, but can be applied again via the label!
+            Remove labels from list, if they are partially or completely out of the new cropped image
+            :param image_shape: the shape of the image (620, 420, z), determines if image is being cropped or padded
+            :param label_list: A list of labels for the corresponding image
+            :param z: Number that indicates
+            :return: list of tuples with tuples being (new offset, label), number of discarded labels
+            """
+            offsets_and_labels = []
+            discarded = 0
+            # x and y are fixed to 620, 420. Remember y, because offset y is inverted
+            y_max = 420
 
-        # Padding changes from (620, 420, z) to (640, 448, 512):
-        x_pad = 10
-        y_pad = 14
+            # Padding changes from (620, 420, z) to (640, 448, 512):
+            x_pad = 10
+            y_pad = 14
 
-        # If z-dim exceeds z, image will be cropped
-        if shape[2]> z:
-            # Calculate the borders of the z_dim
-            z_diff = (shape[2] - z) // 2
-            begin = z_diff
-            end = z_diff + z
+            # If z-dim exceeds z, image will be cropped
+            if shape[2]> z:
+                # Calculate the borders of the z_dim
+                z_diff = (shape[2] - z) // 2
+                begin = z_diff
+                end = z_diff + z
 
-            # List for labels that will be removed
-            remove = []
-            for label in labels:
+                # List for labels that will be removed
+                remove = []
+                for label in labels:
 
-                # Voxelspacing for z_dim
-                voxel_spacing = label[1].voxel_spacing[2]
-                # Offset changes:
-                y_offset = y_max - label[1].offset[1]
-                z_offset = int(round(label[1].offset[2] / voxel_spacing))
+                    # Voxelspacing for z_dim
+                    voxel_spacing = label[1].voxel_spacing[2]
+                    # Offset changes:
+                    y_offset = y_max - label[1].offset[1]
+                    z_offset = int(round(label[1].offset[2] / voxel_spacing))
 
-                #If label is completely inside the cropped image
-                if z_offset > begin and (z_offset + label[0].shape[2]) < z_end:
-                    # Offset change:
-                    offset = [label[1].offset[0] + x_pad, y_offset + y_pad, z_offset + z_diff]
+                    #If label is completely inside the cropped image
+                    if z_offset > begin and (z_offset + label[0].shape[2]) < z_end:
+                        # Offset change:
+                        offset = [label[1].offset[0] + x_pad, y_offset + y_pad, z_offset + z_diff]
+                        offsets_and_labels.append((offset, label))
+                        # Else: label will be not be appended, counter for discarded labels increases
+                    else:
+                        discarded = discarded + 1
+            # z will be padded from both sides
+            else:
+                # Calculate padding for z
+                z_pad = (z - label[0].shape[2]) // 2
+                # Add change to offsets
+                for label in labels:
+                    # Voxelspacing for z_dim
+                    voxel_spacing = label[1].voxel_spacing[2]
+                    # Offset changes:
+                    y_offset = y_max - label[1].offset[1]
+                    z_offset = int(round(label[1].offset[2] / voxel_spacing))
+                    offset = [label[1].offset[0] + x_pad, y_offset + y_pad, z_offset + z_pad]
                     offsets_and_labels.append((offset, label))
-                # Else: label will be not be appended, counter for discarded labels increases
-                else:
-                    discarded = discarded + 1
-        # z will be padded from both sides
-        else:
-            # Calculate padding for z
-            z_pad = (z - label[0].shape[2]) // 2
-            # Add change to offsets
-            for label in labels:
-                # Voxelspacing for z_dim
-                voxel_spacing = label[1].voxel_spacing[2]
-                # Offset changes:
-                y_offset = y_max - label[1].offset[1]
-                z_offset = int(round(label[1].offset[2] / voxel_spacing))
-                offset = [label[1].offset[0] + x_pad, y_offset + y_pad, z_offset + z_pad]
-                offsets_and_labels.append((offset, label))
 
-        return offsets_and_labels, discarded
+            return offsets_and_labels, discarded
 
 
     # label_masks
