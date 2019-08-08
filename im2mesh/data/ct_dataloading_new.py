@@ -184,9 +184,18 @@ class CTImagesDataset(Dataset):
 	        # Y is inverted !!!
             # Label offset:
             offset = label[0]
-            # List of nearest points, subtract offset from points to lookup point in label:
-	        # Change for y: x - offset, z - offset, y + offset?
-            nearest_points = [np.subtract(point, offset) for point in np.round(points).astype(int)]
+            # Label shape
+            shape = label[1][0].shape
+            # Array with one offset for each point in points
+            offset_array = np.empty(points.shape)
+            offset_array[:] = np.array(offset)
+            # Subtract y_shape from y_offset
+            offset_array[:, 1] = offset_array[:, 1] - shape[1]
+            # List of nearest points, subtract offset from points to lookup point in label
+            nearest_points = np.round(points).astype(int)
+            # Get label indices for each given point
+            nearest_points = nearest_points - offset_array
+            print(nearest_points)
             # Look up occupancy values of points
             return label[1][0][nearest_points[:,0], nearest_points[:, 1], nearest_points[:,2]]
 
