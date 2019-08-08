@@ -184,8 +184,10 @@ class CTImagesDataset(Dataset):
 	        # Y is inverted !!!
             # Label offset:
             offset = label[0]
+            print("Offset: ", offset)
             # Label shape
             shape = label[1][0].shape
+            print("Shape: ", shape)
             # Array with one offset for each point in points
             offset_array = np.empty(points.shape)
             offset_array[:] = np.array(offset)
