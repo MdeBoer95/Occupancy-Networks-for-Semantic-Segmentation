@@ -8,6 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision
 import im2mesh.data.ct_transforms as ct_transforms
 import time
+import warnings
 
 LABEL_SUFFIX = "_label_"  # followed by a number and the file format
 MHA_FORMAT = ".mha"
@@ -110,16 +111,17 @@ class CTImagesDataset(Dataset):
 
                 # Voxelspacing for z_dim
                 voxel_spacing = label[1].get_voxel_spacing()[2]
-                # Offset changes:
-		# Y is inverted !!!
-                y_offset = label[1].offset[1]
-		# Implement warning 
-                z_offset = int(round(label[1].offset[2] / voxel_spacing))
+                z_offset = label[1].offset[2] / voxel_spacing
+		        # Implement warning
+                if (z_offset) % 1 > 0:
+                    warnings.warn("Voxel spacing is not correct")
+                z_offset = int(round(z_offset))
 
                 #If label is completely inside the cropped image
                 if z_offset > begin and (z_offset + label[0].shape[2]) < end:
                     # Offset change:
-                    offset = [label[1].offset[0] + x_pad, y_offset - y_pad, z_offset + z_diff]
+                    # Y is inverted !!!
+                    offset = [label[1].offset[0] + x_pad, label[1].offset[1] - y_pad, z_offset + z_diff]
                     offsets_and_labels.append((offset, label))
                 # Else: label will be not be appended, counter for discarded labels increases
                 else:
@@ -127,15 +129,15 @@ class CTImagesDataset(Dataset):
         # z will be padded from both sides
         else:
             # Calculate padding for z
-            z_pad = (z - label[0].shape[2]) // 2
+            z_pad = (z - shape[2]) // 2
             # Add change to offsets
             for label in label_list:
                 # Voxelspacing for z_dim
                 voxel_spacing = label[1].get_voxel_spacing()[2]
                 # Offset changes:
-                y_offset = label[1].offset[1]
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
-                offset = [label[1].offset[0] + x_pad, y_offset - y_pad, z_offset + z_pad]
+                # Y is inverted !!!
+                offset = [label[1].offset[0] + x_pad, label[1].offset[1] - y_pad, z_offset + z_pad]
                 offsets_and_labels.append((offset, label))
 
         return offsets_and_labels, discarded
@@ -178,11 +180,12 @@ class CTImagesDataset(Dataset):
             :param points: list of points to look up inside the label
             :return: occupancy values for points
             """
-	    # Y is inverted !!!
+
+	        # Y is inverted !!!
             # Label offset:
             offset = label[0]
             # List of nearest points, subtract offset from points to lookup point in label:
-	    # Change for y: x - offset, z - offset, y + offset?
+	        # Change for y: x - offset, z - offset, y + offset?
             nearest_points = [np.subtract(point, offset) for point in np.round(points).astype(int)]
             # Look up occupancy values of points
             return label[1][0][nearest_points[:,0], nearest_points[:, 1], nearest_points[:,2]]
@@ -196,12 +199,13 @@ class CTImagesDataset(Dataset):
             """
             shape = label[1][0].shape
             offset = label[0]
-            x_low = x_offset
-            x_high = x_offset + shape[0]
-            y_low = y_offset
-            y_high = y_offset + shape[1]
-            z_low = z_offset
-            z_high = z_offset+ shape[2]
+            x_low = offset[0]
+            x_high = offset[0] + shape[0]
+            # Y is inverted !!!
+            y_low = offset[1]
+            y_high = offset[1] - shape[1]
+            z_low = offset[2]
+            z_high = offset[2]+ shape[2]
 
             return (x_low, x_high, y_low, y_high, z_low, z_high)
 
