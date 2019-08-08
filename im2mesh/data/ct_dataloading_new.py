@@ -114,7 +114,7 @@ class CTImagesDataset(Dataset):
                 z_offset = label[1].offset[2] / voxel_spacing
 		        # Implement warning
                 if (z_offset) % 1 > 0:
-                    warnings.warn("Voxel spacing is not correct")
+                    warnings.warn("Voxel spacing is not correct, off by: ", z_offset % 1)
                 z_offset = int(round(z_offset))
 
                 #If label is completely inside the cropped image
@@ -194,7 +194,7 @@ class CTImagesDataset(Dataset):
             # List of nearest points, subtract offset from points to lookup point in label
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
-            nearest_points = nearest_points - offset_array
+            nearest_points = np.round(nearest_points - offset_array).astype(int)
             print(nearest_points)
             # Look up occupancy values of points
             return label[1][0][nearest_points[:,0], nearest_points[:, 1], nearest_points[:,2]]
