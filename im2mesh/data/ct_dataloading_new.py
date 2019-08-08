@@ -212,12 +212,12 @@ class CTImagesDataset(Dataset):
             shape = label[1][0].shape
             offset = label[0]
             x_low = offset[0]
-            x_high = offset[0] + shape[0] - 0.5
+            x_high = offset[0] + shape[0] - 0.501
             # Y is inverted !!!
             y_low = offset[1]
-            y_high = offset[1] - shape[1] + 0.5
+            y_high = offset[1] - shape[1] + 0.501
             z_low = offset[2]
-            z_high = offset[2]+ shape[2] - 0.5
+            z_high = offset[2]+ shape[2] - 0.501
 
             return (x_low, x_high, y_low, y_high, z_low, z_high)
 
