@@ -114,7 +114,7 @@ class CTImagesDataset(Dataset):
                 z_offset = label[1].offset[2] / voxel_spacing
 		        # Implement warning
                 if (z_offset) % 1 > 0:
-                    warnings.warn("Voxel spacing is not correct, off by: ", z_offset % 1)
+                    warnings.warn("Voxel spacing is not correct, off by: "+ str(z_offset % 1))
                 z_offset = int(round(z_offset))
 
                 #If label is completely inside the cropped image
