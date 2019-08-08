@@ -208,15 +208,16 @@ class CTImagesDataset(Dataset):
             :param label: tuple of (new offset, label)
             :return: 6 tuple with start and end of the bounding box in each dimension
             """
+            warnings.warn("Is there a better fix than shorting the range to prevent IndexError?")
             shape = label[1][0].shape
             offset = label[0]
             x_low = offset[0]
-            x_high = offset[0] + shape[0]
+            x_high = offset[0] + shape[0] - 0.5
             # Y is inverted !!!
             y_low = offset[1]
-            y_high = offset[1] - shape[1]
+            y_high = offset[1] - shape[1] + 0.5
             z_low = offset[2]
-            z_high = offset[2]+ shape[2]
+            z_high = offset[2]+ shape[2] - 0.5
 
             return (x_low, x_high, y_low, y_high, z_low, z_high)
 
