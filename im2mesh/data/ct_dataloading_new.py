@@ -70,7 +70,7 @@ class CTImagesDataset(Dataset):
         image = image_transform(image)
         #
         labels, discarded = self.determine_offsets(image_shape, mha_labels, 512)
-        points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024)
+        points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024, image_shape)
 
 
         sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
@@ -123,7 +123,7 @@ class CTImagesDataset(Dataset):
                     # Y is inverted !!!
                     offset = [label[1].offset[0] + x_pad, label[1].offset[1] - y_pad, z_offset + z_diff]
                     offsets_and_labels.append((offset, label))
-                # Else: label will be not be appended, counter for discarded labels increases
+                # Else: Label will be discarded
                 else:
                     discarded = discarded + 1
         # z will be padded from both sides
@@ -144,22 +144,16 @@ class CTImagesDataset(Dataset):
 
 
     # label_masks
-    def _sample_points_inside_boundingboxes(self, labels, num_points):
+    def _sample_points_inside_boundingboxes(self, labels, num_points, image_shape):
         """
         Sample a given number of points from the bounding box of an object.
         :param labels: list of tuples (new offset, label) for labels inside the ct image
         :param num_points: the number of points to draw in total
+        :param image_shape: the shape of the image
         :return: a list of x,y,z coordinate pairs with length num_points
+
         """
-
-        num_labels = len(labels)
-        points_per_label = num_points//num_labels  # points per label
-        rest = num_points - points_per_label * num_labels  # if not possible to distribute equally, draw the remaining
-                                                           # ones from the first bounding box
-        points_per_label = [points_per_label for _ in range(num_labels)]
-
-        points_per_label[0] += rest
-
+        # Functions needed
         def sample_points(num_points, limit_tuple):
             """
             sample random real values in the ranges given by the 'limit-tuple'
@@ -181,7 +175,7 @@ class CTImagesDataset(Dataset):
             :return: occupancy values for points
             """
 
-	        # Y is inverted !!!
+            # Y is inverted !!!
             # Label offset:
             offset = label[0]
             print("Offset: ", offset)
@@ -199,7 +193,7 @@ class CTImagesDataset(Dataset):
             nearest_points = np.round(nearest_points - offset_array).astype(int)
             print(nearest_points)
             # Look up occupancy values of points
-            return label[1][0][nearest_points[:,0], nearest_points[:, 1], nearest_points[:,2]]
+            return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
         # change
         def bounding_box_limit(label):
@@ -208,7 +202,7 @@ class CTImagesDataset(Dataset):
             :param label: tuple of (new offset, label)
             :return: 6 tuple with start and end of the bounding box in each dimension
             """
-            warnings.warn("Is there a better fix than shorting the range to prevent IndexError?")
+            print("Better fix than manipulating range?")
             shape = label[1][0].shape
             offset = label[0]
             x_low = offset[0]
@@ -217,9 +211,26 @@ class CTImagesDataset(Dataset):
             y_low = offset[1]
             y_high = offset[1] - shape[1] + 0.501
             z_low = offset[2]
-            z_high = offset[2]+ shape[2] - 0.501
+            z_high = offset[2] + shape[2] - 0.501
 
             return (x_low, x_high, y_low, y_high, z_low, z_high)
+
+        num_labels = len(labels)
+
+        # If all labels have been discarded:
+        if num_labels == 0:
+            print("All labels have been discarded for given image")
+            emergency_case = ([0, 0, 0], [image_shape, 0])
+            limit = bounding_box_limit(emergency_case)
+            points = sample_points(1024, limit)
+            occ = lookup_occ(emergency_case, points)
+            return points, occ
+
+        points_per_label = num_points//num_labels  # points per label
+        rest = num_points - points_per_label * num_labels  # if not possible to distribute equally, draw the remaining
+                                                           # ones from the first bounding box
+        points_per_label = [points_per_label for _ in range(num_labels)]
+        points_per_label[0] += rest
 
         # sample points from each bounding box
         all_points = np.array([np.inf, np.inf, np.inf]).reshape(1,3)  # remove dummy entry later
