@@ -69,7 +69,7 @@ class CTImagesDataset(Dataset):
         image_transform = torchvision.transforms.Compose(transformations)
         image = image_transform(image)
         #
-        labels = self.determine_offsets(image_shape, mha_labels, 512)
+        labels, discarded = self.determine_offsets(image_shape, mha_labels, 512)
         points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024)
 
 
