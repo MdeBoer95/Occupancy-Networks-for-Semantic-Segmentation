@@ -210,8 +210,8 @@ class CTImagesDataset(Dataset):
             x_low = offset[0] -0.49
             x_high = offset[0] + shape[0] - 0.51
             # Y is inverted !!!
-            y_low = offset[1] + 0.51
-            y_high = offset[1] - shape[1] + 0.49
+            y_low = offset[1] + 0.49
+            y_high = offset[1] - shape[1] + 0.51
             z_low = offset[2] - 0.49
             z_high = offset[2] + shape[2] - 0.51
 
