@@ -166,7 +166,7 @@ class CTImagesDataset(Dataset):
             z_coords = np.round(np.random.uniform(low=limit_tuple[4], high=limit_tuple[5], size=(num_points, 1)), 3)
             points_xyz = np.hstack((x_coords, y_coords, z_coords))
             print("Limit tuple: ", limit_tuple)
-            print("Max x, y, z: ", max(x_coords), max(y_coords), max(z_coords))
+
             return points_xyz
 
         def lookup_occ(label, points):
@@ -193,7 +193,7 @@ class CTImagesDataset(Dataset):
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
             nearest_points = np.round(nearest_points - offset_array).astype(int)
-            print(nearest_points)
+            print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]),max(nearest_points[:, 2]))
             # Look up occupancy values of points
             return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
