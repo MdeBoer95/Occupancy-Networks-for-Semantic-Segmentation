@@ -188,7 +188,7 @@ class CTImagesDataset(Dataset):
             offset_array = np.empty(points.shape)
             offset_array[:] = np.array(offset)
             # Subtract y_shape from y_offset
-            offset_array[:, 1] = offset_array[:, 1] - shape[1] - 1
+            offset_array[:, 1] = offset_array[:, 1] - shape[1] + 1
             # List of nearest points, subtract offset from points to lookup point in label
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
