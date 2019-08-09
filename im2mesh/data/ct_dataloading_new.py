@@ -193,7 +193,7 @@ class CTImagesDataset(Dataset):
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
             nearest_points = np.round(nearest_points - offset_array).astype(int)
-            print("Max x,y,z in shape: ", max(nearest_points[:, 0]), min(nearest_points[:, 1]),max(nearest_points[:, 2]))
+            print("Max x,y,z in shape: ", min(nearest_points[:, 0]), min(nearest_points[:, 1]),min(nearest_points[:, 2]))
             # Look up occupancy values of points
             return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
