@@ -165,6 +165,8 @@ class CTImagesDataset(Dataset):
             y_coords = np.round(np.random.uniform(low=limit_tuple[2], high=limit_tuple[3], size=(num_points, 1)), 3)
             z_coords = np.round(np.random.uniform(low=limit_tuple[4], high=limit_tuple[5], size=(num_points, 1)), 3)
             points_xyz = np.hstack((x_coords, y_coords, z_coords))
+            print("Limit tuple: ", limit_tuple)
+            print("Max x, y, z: ", max(x_coords), max(y_coords), max(z_coords))
             return points_xyz
 
         def lookup_occ(label, points):
