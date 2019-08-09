@@ -207,13 +207,13 @@ class CTImagesDataset(Dataset):
             print("Better fix than manipulating range?")
             shape = label[1][0].shape
             offset = label[0]
-            x_low = offset[0]
-            x_high = offset[0] + shape[0] - 0.501
+            x_low = offset[0] -0.49
+            x_high = offset[0] + shape[0] - 0.51
             # Y is inverted !!!
-            y_low = offset[1]
-            y_high = offset[1] - shape[1] + 0.501
-            z_low = offset[2]
-            z_high = offset[2] + shape[2] - 0.501
+            y_low = offset[1] + 0.49
+            y_high = offset[1] - shape[1] + 0.51
+            z_low = offset[2] - 0.49
+            z_high = offset[2] + shape[2] - 0.51
 
             return (x_low, x_high, y_low, y_high, z_low, z_high)
 
