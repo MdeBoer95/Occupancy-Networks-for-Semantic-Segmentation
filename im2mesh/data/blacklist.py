@@ -45,7 +45,7 @@ for paths in all_files:
         # Load labels
         labels = []
 		useful_labels = []
-        for label_path in paths[1]:
+		for label_path in paths[1]:
             labels.append(load(os.path.join(label_path)))
         # Calculate the borders of the z_dim
         z_diff = (shape[2] - z) // 2
