@@ -44,14 +44,14 @@ for paths in all_files:
     if image.shape[2] < 512:
         # Load labels
         labels = []
+		useful_labels = []
         for label_path in paths[1]:
             labels.append(load(os.path.join(label_path)))
-
         # Calculate the borders of the z_dim
         z_diff = (shape[2] - z) // 2
         begin = z_diff
         end = z_diff + z
-		useful_labels = []
+
         for label in labels:
             # Voxelspacing for z_dim
             voxel_spacing = label[1].get_voxel_spacing()[2]
