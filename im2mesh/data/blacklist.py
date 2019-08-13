@@ -41,35 +41,32 @@ print("Started blacklisting images")
 z = 512
 # Check labels, if in cropped image
 for paths in all_files:
-	image = load(paths[0])[0].astype('float32')
+    image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
-	labels = []
-	useful_labels = []
-	if image.shape[2] < 512:
+    labels = []
+    useful_labels = []
+    if image.shape[2] < 512:
         # Load labels
-
-		for label_path in paths[1]:
-			labels.append(load(os.path.join(label_path)))
-        # Calculate the borders of the z_dim
-        z_diff = (shape[2] - z) // 2
-        begin = z_diff
-        end = z_diff + z
-
+        for label_path in paths[1]:
+            labels.append(load(os.path.join(label_path)))
+            # Calculate the borders of the z_dim
+            z_diff = (shape[2] - z) // 2
+            begin = z_diff
+            end = z_diff + z
         for label in labels:
             # Voxelspacing for z_dim
             voxel_spacing = label[1].get_voxel_spacing()[2]
             z_offset = label[1].offset[2] / voxel_spacing
-		    # Warning
+            # Warning
             if (z_offset) % 1 > 0:
                 print("Voxel spacing is not correct, off by: ", z_offset % 1)
                 z_offset = int(round(z_offset))
-
             #If label is completely inside the cropped image
             if z_offset > begin and (z_offset + label[0].shape[2]) < end:
-
-				useful_labels.append(label)
-		if len(useful_labels) == 0:
-			blacklist.append(paths[0])
+                useful_labels.append(label)
+        if len(useful_labels) == 0:
+            blacklist.append(paths[0])
+            
 # Pickle blacklist
 outfile = open(OUT_FILE, 'wb')
 pickle.dump(blacklist, outfile)
