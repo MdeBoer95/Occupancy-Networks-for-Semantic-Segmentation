@@ -37,14 +37,17 @@ for sub_dir in sub_dirs:
             all_files.append([image_filepath, label_filepaths])
 print("Read files: ", time.time() - start)
 print("Started blacklisting images")
+
+z = 512
 # Check labels, if in cropped image
 for paths in all_files:
     image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
+	labels = []
+	useful_labels = []
     if image.shape[2] < 512:
         # Load labels
-        labels = []
-		useful_labels = []
+
 		for label_path in paths[1]:
             labels.append(load(os.path.join(label_path)))
         # Calculate the borders of the z_dim
@@ -58,17 +61,20 @@ for paths in all_files:
             z_offset = label[1].offset[2] / voxel_spacing
 		    # Warning
             if (z_offset) % 1 > 0:
-                print("Voxel spacing is not correct, off by: "z_offset % 1)
+                print("Voxel spacing is not correct, off by: ", z_offset % 1)
                 z_offset = int(round(z_offset))
 
             #If label is completely inside the cropped image
             if z_offset > begin and (z_offset + label[0].shape[2]) < end:
-                    useful_labels.append(label)
+
+				useful_labels.append(label)
 		if len(useful_labels) == 0:
 			blacklist.append(paths[0])
 # Pickle blacklist
 outfile = open(OUT_FILE, 'wb')
 pickle.dump(blacklist, outfile)
 outfile.close()
-
+print("Number of blacklisted images: ", len(blacklist))
+for image in blacklist:
+	print(image)
 print("Blacklisted all images: ", time.time() - start)
