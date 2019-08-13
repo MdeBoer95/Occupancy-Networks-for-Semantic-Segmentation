@@ -67,12 +67,13 @@ for paths in all_files:
                 useful_labels.append(label)
         if len(useful_labels) == 0:
             blacklist.append(paths[0])
+            print("New entry for blacklist: ", paths[0])
+        else:
+            print("Useful labels found for given image: ", paths[0])
 
 # Pickle blacklist
 outfile = open(OUT_FILE, 'wb')
 pickle.dump(blacklist, outfile)
 outfile.close()
 print("Number of blacklisted images: ", len(blacklist))
-for image in blacklist:
-	print(image)
 print("Blacklisted all images: ", time.time() - start)
