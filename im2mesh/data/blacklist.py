@@ -16,7 +16,7 @@ blacklist = []
 LABEL_SUFFIX = "_label_"  # followed by a number and the file format
 MHA_FORMAT = ".mha"
 ROOT = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/"
-OUT_FILE = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.pkl"
+OUT_FILE = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt"
 # out_dir = "out/semseg/onet"
 # Only get name, if directory
 sub_dirs = [x for x in os.listdir(ROOT) if os.path.isdir(os.path.join(ROOT, x))]
@@ -73,8 +73,9 @@ for paths in all_files:
         print("Runtime: ", time.time() - start)
 
 # Pickle blacklist
-outfile = open(OUT_FILE, 'wb')
-pickle.dump(blacklist, outfile)
+outfile = open(OUT_FILE, "w+")
+for image in blacklist:
+    outfile.write(image)
 outfile.close()
 print("Number of blacklisted images: ", len(blacklist))
 print("Blacklisted all images: ", time.time() - start)
