@@ -43,9 +43,10 @@ z = 512
 for paths in all_files:
     image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
+    shape = image.shape
     labels = []
     useful_labels = []
-    if image.shape[2] < 512:
+    if shape[2] < 512:
         # Load labels
         for label_path in paths[1]:
             labels.append(load(os.path.join(label_path)))
