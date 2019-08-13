@@ -70,6 +70,7 @@ for paths in all_files:
             print("New entry for blacklist: ", paths[0])
         else:
             print("Useful labels found for given image: ", paths[0])
+        print("Runtime: ", time.time() - start)
 
 # Pickle blacklist
 outfile = open(OUT_FILE, 'wb')
