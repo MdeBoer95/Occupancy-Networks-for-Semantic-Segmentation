@@ -30,7 +30,7 @@ for sub_dir in sub_dirs:
             image_filepath = os.path.join(ROOT, sub_dir, filename)
             # Label paths
             label_filepaths = [os.path.join(ROOT, sub_dir, labelname)
-                                for labelname in sub_dir_files
+                                for labelname in files
                                     if LABEL_SUFFIX in labelname and labelname.endswith(MHA_FORMAT)
                                         and filename[0:-4] in labelname]
             # Append paths from found images with corresponding labels
@@ -66,7 +66,7 @@ for paths in all_files:
                 useful_labels.append(label)
         if len(useful_labels) == 0:
             blacklist.append(paths[0])
-            
+
 # Pickle blacklist
 outfile = open(OUT_FILE, 'wb')
 pickle.dump(blacklist, outfile)
