@@ -45,13 +45,14 @@ for paths in all_files:
     image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
     shape = image.shape
-    z_diff = (shape[2] - z) // 2
-    begin = z_diff
-    end = z_diff + z
-    print("Image: " + paths[0] + ", Difference, Begin, End: " + str(z_diff) + ", " + str(begin) + ", " + str(end))
+
     useful_labels = []
     if shape[2] < 512:
         # Load labels
+        z_diff = (shape[2] - z) // 2
+        begin = z_diff
+        end = z_diff + z
+        print("Image: " + paths[0] + ", Difference, Begin, End: " + str(z_diff) + ", " + str(begin) + ", " + str(end))
 
         for label_path in paths[1]:
             label = load(os.path.join(label_path))
