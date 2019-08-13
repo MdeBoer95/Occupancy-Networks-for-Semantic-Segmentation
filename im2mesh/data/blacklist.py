@@ -64,6 +64,7 @@ for paths in all_files:
                 z_offset = int(round(z_offset))
             #If label is completely inside the cropped image
             if z_offset > begin and (z_offset + label[0].shape[2]) < end:
+                print(len(useful_labels))
                 useful_labels.append(label)
         if len(useful_labels) == 0:
             blacklist.append(paths[0])
