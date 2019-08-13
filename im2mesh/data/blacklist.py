@@ -41,11 +41,11 @@ print("Started blacklisting images")
 z = 512
 # Check labels, if in cropped image
 for paths in all_files:
-    image = load(paths[0])[0].astype('float32')
+	image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
 	labels = []
 	useful_labels = []
-    if image.shape[2] < 512:
+	if image.shape[2] < 512:
         # Load labels
 
 		for label_path in paths[1]:
