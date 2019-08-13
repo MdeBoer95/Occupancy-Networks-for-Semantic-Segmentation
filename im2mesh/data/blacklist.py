@@ -47,7 +47,7 @@ for paths in all_files:
     shape = image.shape
 
     useful_labels = []
-    if shape[2] < 512:
+    if shape[2] > 512:
         # Load labels
         z_diff = (shape[2] - z) // 2
         begin = z_diff
