@@ -37,7 +37,7 @@ class CTImagesDataset(Dataset):
             # if(len(allfiles) > 200):
             #    break
             for filename in sub_dir_files:
-                    if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename and filename not in blacklist:
+                if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename and filename not in blacklist:
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
@@ -57,7 +57,6 @@ class CTImagesDataset(Dataset):
     def __getitem__(self, idx):
         image = load(self.allfiles[idx][0])[0].astype('float32')  # only take the image data, not the header
         image_shape = image.shape
-
         mha_labels = []
         for labelpath in self.allfiles[idx][1]:
             mha_labels.append(load(os.path.join(labelpath)))
