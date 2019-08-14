@@ -25,10 +25,10 @@ class CTImagesDataset(Dataset):
         self.root_dir = root_dir
         # Only get name, if directory
         self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
-		blacklist_string = open("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt", r).read()
-		blacklist = blacklist_string.split(".mha")
-		blacklist = [x + '.mha' for x in blacklist]
-		print(blacklist)
+        blacklist_string = open("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt", r).read()
+        blacklist = blacklist_string.split(".mha")
+        blacklist = [x + '.mha' for x in blacklist]
+        print(blacklist)
         # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         for sub_dir in self.sub_dirs:
@@ -116,7 +116,7 @@ class CTImagesDataset(Dataset):
                 # Voxelspacing for z_dim
                 voxel_spacing = label[1].get_voxel_spacing()[2]
                 z_offset = label[1].offset[2] / voxel_spacing
-		        # Implement warning
+                # Implement warning
                 if (z_offset) % 1 > 0:
                     warnings.warn("Voxel spacing is not correct, off by: "+ str(z_offset % 1))
                 z_offset = int(round(z_offset))
