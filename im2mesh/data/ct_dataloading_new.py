@@ -31,12 +31,12 @@ class CTImagesDataset(Dataset):
         # store the path for each viable image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         for sub_dir in self.sub_dirs:
-            sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
+            sub_dir_files = os.listdir(os.path.join(root_dir, sub_dir))
             # Only for testing: remove this 'if' later
             # if(len(allfiles) > 200):
             #    break
             for filename in sub_dir_files:
-                if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (filename not in blacklist):
+                if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (os.path.join(root_dir, sub_dir, filename) not in blacklist):
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
@@ -46,7 +46,7 @@ class CTImagesDataset(Dataset):
                                                 and filename[0:-4] in labelname]
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
-                elif (filename in blacklist):
+                elif (os.path.join(root_dir, sub_dir, filename) in blacklist):
                     print("Daran hat's gelegen")
 
         self.allfiles = allfiles
