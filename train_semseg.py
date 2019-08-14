@@ -53,6 +53,8 @@ dataset_length = len(dataset)
 train_length = math.floor(0.7*dataset_length)
 val_length = math.ceil(0.1*dataset_length)
 test_length = math.floor(0.2*dataset_length)
+print(len(CTImagesDataset))
+print(train_length + val_length + test_length)
 train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [train_length, val_length, test_length])
 
 # Loader for train_dataset
