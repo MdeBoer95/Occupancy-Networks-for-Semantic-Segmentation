@@ -26,7 +26,7 @@ class CTImagesDataset(Dataset):
         # Only get name, if directory
         self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
 		blacklist_string = open("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt", r).read()
-		blacklist = blacklist_string.split(".mha")
+        blacklist = blacklist_string.split(".mha")
 		blacklist = [x + '.mha' for x in blacklist]
 		print(blacklist)
         # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
