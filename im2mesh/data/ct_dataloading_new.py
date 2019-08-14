@@ -29,7 +29,7 @@ class CTImagesDataset(Dataset):
         blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
         print(blacklist)
         blacklist_file.close()
-        # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
+        # store the path for each viable image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
@@ -37,7 +37,7 @@ class CTImagesDataset(Dataset):
             # if(len(allfiles) > 200):
             #    break
             for filename in sub_dir_files:
-                if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename:
+                    if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename and filename not in blacklist:
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
