@@ -46,9 +46,7 @@ class CTImagesDataset(Dataset):
                                                 and filename[0:-4] in labelname]
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
-                elif (os.path.join(root_dir, sub_dir, filename) in blacklist):
-                    print("Daran hat's gelegen")
-
+        
         self.allfiles = allfiles
 
 
@@ -166,7 +164,7 @@ class CTImagesDataset(Dataset):
             y_coords = np.round(np.random.uniform(low=limit_tuple[2], high=limit_tuple[3], size=(num_points, 1)), 3)
             z_coords = np.round(np.random.uniform(low=limit_tuple[4], high=limit_tuple[5], size=(num_points, 1)), 3)
             points_xyz = np.hstack((x_coords, y_coords, z_coords))
-            print("Limit tuple: ", limit_tuple)
+            # print("Limit tuple: ", limit_tuple)
 
             return points_xyz
 
@@ -181,10 +179,10 @@ class CTImagesDataset(Dataset):
             # Y is inverted !!!
             # Label offset:
             offset = label[0]
-            print("Offset: ", offset)
+            # print("Offset: ", offset)
             # Label shape
             shape = label[1][0].shape
-            print("Shape: ", shape)
+            # print("Shape: ", shape)
             # Array with one offset for each point in points
             offset_array = np.empty(points.shape)
             offset_array[:] = np.array(offset)
@@ -194,7 +192,7 @@ class CTImagesDataset(Dataset):
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
             nearest_points = np.round(nearest_points - offset_array).astype(int)
-            print("Max x,y,z in shape: ", min(nearest_points[:, 0]), min(nearest_points[:, 1]),min(nearest_points[:, 2]))
+            # print("Max x,y,z in shape: ", min(nearest_points[:, 0]), min(nearest_points[:, 1]),min(nearest_points[:, 2]))
             # Look up occupancy values of points
             return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
@@ -204,7 +202,7 @@ class CTImagesDataset(Dataset):
             :param label: tuple of (new offset, label)
             :return: 6 tuple with start and end of the bounding box in each dimension
             """
-            print("Better fix than manipulating range?")
+            # print("Better fix than manipulating range?")
             shape = label[1][0].shape
             offset = label[0]
             x_low = offset[0] -0.49
