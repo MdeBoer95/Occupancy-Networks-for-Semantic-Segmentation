@@ -46,7 +46,7 @@ class CTImagesDataset(Dataset):
                                                 and filename[0:-4] in labelname]
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
-                else if (filename in blacklist):
+                elif (filename in blacklist):
                     print("Daran hat's gelegen")
 
         self.allfiles = allfiles
