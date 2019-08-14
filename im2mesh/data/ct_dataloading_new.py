@@ -120,8 +120,8 @@ class CTImagesDataset(Dataset):
                 #If label is completely inside the cropped image
                 if z_offset > begin and (z_offset + label[0].shape[2]) < end:
                     # Offset change:
-                    # Y is inverted !!!
-                    offset = [label[1].offset[0] + x_pad, label[1].offset[1] - y_pad, z_offset + z_diff]
+                    # Invert y !!!
+                    offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset + z_diff]
                     offsets_and_labels.append((offset, label))
         # Else: Label will be discarded
         # z will be padded from both sides
@@ -134,8 +134,8 @@ class CTImagesDataset(Dataset):
                 voxel_spacing = label[1].get_voxel_spacing()[2]
                 # Offset changes:
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
-                # Y is inverted !!!
-                offset = [label[1].offset[0] + x_pad, label[1].offset[1] - y_pad, z_offset + z_pad]
+                # Invert y
+                offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset + z_pad]
                 offsets_and_labels.append((offset, label))
 
         return offsets_and_labels
@@ -185,13 +185,13 @@ class CTImagesDataset(Dataset):
             # Array with one offset for each point in points
             offset_array = np.empty(points.shape)
             offset_array[:] = np.array(offset)
-            # Subtract y_shape from y_offset
-            offset_array[:, 1] = offset_array[:, 1] - shape[1] + 1
             # List of nearest points, subtract offset from points to lookup point in label
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
             nearest_points = np.round(nearest_points - offset_array).astype(int)
-            # print("Max x,y,z in shape: ", min(nearest_points[:, 0]), min(nearest_points[:, 1]),min(nearest_points[:, 2]))
+            print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]), max(nearest_points[:, 2]))
+            print("min x,y,z in shape: ", min(nearest_points[:, 0]), min(nearest_points[:, 1]),
+                  min(nearest_points[:, 2]))
             # Look up occupancy values of points
             return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
@@ -207,8 +207,8 @@ class CTImagesDataset(Dataset):
             x_low = offset[0] -0.49
             x_high = offset[0] + shape[0] - 0.51
             # Y is inverted !!!
-            y_low = offset[1] + 0.49
-            y_high = offset[1] - shape[1] + 0.51
+            y_low = offset[1] - 0.49
+            y_high = offset[1] + shape[1] - 0.51
             z_low = offset[2] - 0.49
             z_high = offset[2] + shape[2] - 0.51
 
