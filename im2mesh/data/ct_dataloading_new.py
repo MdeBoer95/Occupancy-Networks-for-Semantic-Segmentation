@@ -8,7 +8,6 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision
 import im2mesh.data.ct_transforms as ct_transforms
 import time
-import warnings
 
 LABEL_SUFFIX = "_label_"  # followed by a number and the file format
 MHA_FORMAT = ".mha"
@@ -113,9 +112,9 @@ class CTImagesDataset(Dataset):
                 # Voxelspacing for z_dim
                 voxel_spacing = label[1].get_voxel_spacing()[2]
                 z_offset = label[1].offset[2] / voxel_spacing
-                # Implement warning
+                # Offset sometimes off by a very small amount (10^-14)
                 if (z_offset) % 1 > 0:
-                    warnings.warn("Voxel spacing is not correct, off by: "+ str(z_offset % 1))
+                    print("Voxel spacing is not correct, off by: "+ str(z_offset % 1))
                 z_offset = int(round(z_offset))
 
                 #If label is completely inside the cropped image
