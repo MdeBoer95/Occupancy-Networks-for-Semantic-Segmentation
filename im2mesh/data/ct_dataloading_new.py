@@ -27,7 +27,6 @@ class CTImagesDataset(Dataset):
         self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
         blacklist_file = open("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt", "r")
         blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
-        print(blacklist)
         blacklist_file.close()
         # store the path for each viable image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
@@ -37,7 +36,7 @@ class CTImagesDataset(Dataset):
             # if(len(allfiles) > 200):
             #    break
             for filename in sub_dir_files:
-                if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename and filename not in blacklist:
+                if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (filename not in blacklist):
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
@@ -47,6 +46,8 @@ class CTImagesDataset(Dataset):
                                                 and filename[0:-4] in labelname]
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
+                else if (filename in blacklist):
+                    print("Daran hat's gelegen")
 
         self.allfiles = allfiles
 
@@ -72,7 +73,7 @@ class CTImagesDataset(Dataset):
         image_transform = torchvision.transforms.Compose(transformations)
         image = image_transform(image)
         #
-        labels, discarded = self.determine_offsets(image_shape, mha_labels, 512)
+        labels = self.determine_offsets(image_shape, mha_labels, 512)
         points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024, image_shape)
 
 
@@ -93,7 +94,6 @@ class CTImagesDataset(Dataset):
         :return: list of tuples with tuples being (new offset, label), number of discarded labels
         """
         offsets_and_labels = []
-        discarded = 0
         # x and y are fixed to 620, 420. Remember y, because offset y is inverted
         y_max = 420
 
@@ -126,9 +126,7 @@ class CTImagesDataset(Dataset):
                     # Y is inverted !!!
                     offset = [label[1].offset[0] + x_pad, label[1].offset[1] - y_pad, z_offset + z_diff]
                     offsets_and_labels.append((offset, label))
-                # Else: Label will be discarded
-                else:
-                    discarded = discarded + 1
+        # Else: Label will be discarded
         # z will be padded from both sides
         else:
             # Calculate padding for z
@@ -143,7 +141,7 @@ class CTImagesDataset(Dataset):
                 offset = [label[1].offset[0] + x_pad, label[1].offset[1] - y_pad, z_offset + z_pad]
                 offsets_and_labels.append((offset, label))
 
-        return offsets_and_labels, discarded
+        return offsets_and_labels
 
 
     # label_masks
@@ -156,7 +154,7 @@ class CTImagesDataset(Dataset):
         :return: a list of x,y,z coordinate pairs with length num_points
 
         """
-        # Functions needed
+        # Needed functions
         def sample_points(num_points, limit_tuple):
             """
             sample random real values in the ranges given by the 'limit-tuple'
@@ -200,7 +198,6 @@ class CTImagesDataset(Dataset):
             # Look up occupancy values of points
             return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
-        # change
         def bounding_box_limit(label):
             """
             Get limits of bounding box of the label inside the image
@@ -223,14 +220,6 @@ class CTImagesDataset(Dataset):
         num_labels = len(labels)
 
         # If all labels have been discarded:
-        if num_labels == 0:
-            print("All labels have been discarded for given image")
-            emergency_case = ([0, 0, 0], [image_shape, 0])
-            limit = bounding_box_limit(emergency_case)
-            points = sample_points(1024, limit)
-            occ = lookup_occ(emergency_case, points)
-            return points, occ
-
         points_per_label = num_points//num_labels  # points per label
         rest = num_points - points_per_label * num_labels  # if not possible to distribute equally, draw the remaining
                                                            # ones from the first bounding box
