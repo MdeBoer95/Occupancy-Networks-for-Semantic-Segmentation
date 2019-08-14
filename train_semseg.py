@@ -57,7 +57,7 @@ train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [tra
 
 # Loader for train_dataset
 train_loader = torch.utils.data.DataLoader(
-    train_dataset, batch_size=batch_size, num_workers=4, shuffle=True,
+    train_dataset, batch_size=batch_size, num_workers=0, shuffle=True,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
 
