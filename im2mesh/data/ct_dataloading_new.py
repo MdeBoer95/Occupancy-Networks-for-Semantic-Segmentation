@@ -25,13 +25,17 @@ class CTImagesDataset(Dataset):
         self.root_dir = root_dir
         # Only get name, if directory
         self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
+		blacklist_string = open("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt", r).read()
+		blacklist = blacklist_string.split(".mha")
+		blacklist = [x + '.mha' for x in blacklist]
+		print(blacklist)
         # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
-            #Only for testing: remove this 'if' later
-            if(len(allfiles) > 200):
-                break
+            # Only for testing: remove this 'if' later
+            # if(len(allfiles) > 200):
+            #    break
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename:
                     # Image paths
@@ -75,7 +79,7 @@ class CTImagesDataset(Dataset):
 
         sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
         return sample
-	
+
 
 
     # Determine bounding boxes
