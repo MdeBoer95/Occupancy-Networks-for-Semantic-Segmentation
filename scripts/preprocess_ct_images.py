@@ -8,25 +8,17 @@ import im2mesh.data.ct_transforms as ct_transforms
 import time
 
 
-parser = argparse.ArgumentParser('Sample a watertight mesh.')
-parser.add_argument('in_folder', type=str,
+parser = argparse.ArgumentParser('Preprocess ct-data.')
+parser.add_argument('--rootdir', type=str,
                     help='ct-images dataset')
-parser.add_argument('--out_folder', type=int,
+parser.add_argument('--out_folder', type=str,
                     help='Uniform size of z-dimension.')
-parser.add_argument('--n_proc', type=int, default=0,
-                    help='Number of processes to use.')
-
-parser.add_argument('--voxels_folder', type=str,
-                    help='Output path for voxelization.')
-parser.add_argument('--voxels_res', type=int, default=32,
-                    help='Resolution for voxelization.')
-
-parser.add_argument('--points_folder', type=str,
-                    help='Output path for points.')
+#parser.add_argument('--voxels_res', type=int, default=32,
+#                    help='Resolution for voxelization.')
 parser.add_argument('--points_size', type=int, default=100000,
                     help='Size of points.')
-parser.add_argument('--overwrite', action='store_true',
-                    help='Whether to overwrite output.')
+#parser.add_argument('--overwrite', action='store_true',
+#                    help='Whether to overwrite output.')
 parser.add_argument('--z_size', type=int,
                     help='Uniform size of z-dimension.')
 
@@ -37,27 +29,27 @@ BLACKLIST_FILE = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-
 
 
 class CTImages_Preprocessor(object):
-    def __init__(self, root_dir, options):
+    def __init__(self, cmd_options):
         """
         Args:
-            root_dir (string): Name of directory with the subdirectories for each image.
+            cmd_options : command line options
         """
-        self.options = options
-        self.root_dir = root_dir
+        self.options = cmd_options
+        self.root_dir = self.options.rootdir
         # Only get name, if directory
-        self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
+        self.sub_dirs = [x for x in os.listdir(self.root_dir) if os.path.isdir(os.path.join(self.root_dir, x))]
         with open(BLACKLIST_FILE) as blacklist_file:
             blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
         # store the path for each viable image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         for sub_dir in self.sub_dirs:
-            sub_dir_files = os.listdir(os.path.join(root_dir, sub_dir))
+            sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
             # Only for testing: remove this 'if' later
             # if(len(allfiles) > 200):
             #    break
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (
-                        os.path.join(root_dir, sub_dir, filename) not in blacklist):
+                        os.path.join(self.root_dir, sub_dir, filename) not in blacklist):
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
@@ -75,7 +67,7 @@ class CTImages_Preprocessor(object):
 
     def preprocess(self):
         opt = self.options
-        for idx in self.num_images():
+        for idx in range(self.num_images()):
             image = load(self.allfiles[idx][0])[0].astype('float32')  # only take the image data, not the header
             image_shape = image.shape
             mha_labels = []
@@ -266,7 +258,11 @@ class CTImages_Preprocessor(object):
 
 
 def main(args):
-    preprocessor = CTImages_Preprocessor("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/")
+    if not os.path.exists(args.out_folder):
+        os.mkdir(args.out_folder)
+    elif len(os.listdir(args.out_folder)) > 0:
+        raise ValueError("out_folder already exists and is not empty")
+    preprocessor = CTImages_Preprocessor(args)
     start = time.time()
     preprocessor.preprocess()
     end = time.time()
