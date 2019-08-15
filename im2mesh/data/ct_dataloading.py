@@ -29,7 +29,7 @@ class CTImagesDataset(Dataset):
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
             #Only for testing: remove this 'if' later
-            if(len(allfiles) > 200):
+            if(len(allfiles) > 20):
                 break
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename:
@@ -50,6 +50,7 @@ class CTImagesDataset(Dataset):
         return len(self.allfiles)
 
     def __getitem__(self, idx):
+        print("called dataloader getitem", idx)
         image = load(self.allfiles[idx][0])[0].astype('float32')  # only take the image data, not the header
         image_shape = image.shape
 

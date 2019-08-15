@@ -78,12 +78,12 @@ class Generator3D(object):
         stats_dict['time (encode inputs)'] = time.time() - t0
 
         z = self.model.get_z_from_prior((1,), sample=self.sample).to(device)
-        mesh = self.generate_from_latent(z, c, stats_dict=stats_dict, **kwargs)
+        mesh, occ_grid = self.generate_from_latent(z, c, stats_dict=stats_dict, **kwargs)
 
         if return_stats:
-            return mesh, stats_dict
+            return mesh, stats_dict, occ_grid
         else:
-            return mesh
+            return mesh, occ_grid
 
     def generate_from_latent(self, z, c=None, stats_dict={}, **kwargs):
         ''' Generates mesh from latent.
@@ -132,7 +132,7 @@ class Generator3D(object):
         stats_dict['time (eval points)'] = time.time() - t0
 
         mesh = self.extract_mesh(value_grid, z, c, stats_dict=stats_dict)
-        return mesh
+        return mesh, value_grid
 
     def eval_points(self, p, z, c=None, **kwargs):
         ''' Evaluates the occupancy values for the points.

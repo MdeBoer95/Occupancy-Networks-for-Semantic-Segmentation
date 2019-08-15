@@ -8,7 +8,7 @@ from im2mesh.common import (
 )
 from im2mesh.utils import visualize as vis
 from im2mesh.training import BaseTrainer
-
+from im2mesh.onet.generation import Generator3D
 
 class Trainer(BaseTrainer):
     ''' Trainer object for the Occupancy Network.
@@ -56,6 +56,8 @@ class Trainer(BaseTrainer):
         Args:
             data (dict): data dictionary
         '''
+        # Original Code
+        '''
         self.model.eval()
 
         device = self.device
@@ -98,7 +100,7 @@ class Trainer(BaseTrainer):
         if voxels_occ is not None:
             voxels_occ = voxels_occ.to(device)
             points_voxels = make_3d_grid(
-                (-0.5 + 1/64,) * 3, (0.5 - 1/64,) * 3, (32,) * 3)
+                (-0.5 + 1 / 64,) * 3, (0.5 - 1 / 64,) * 3, (32,) * 3)
             points_voxels = points_voxels.expand(
                 batch_size, *points_voxels.size())
             points_voxels = points_voxels.to(device)
@@ -111,6 +113,56 @@ class Trainer(BaseTrainer):
             iou_voxels = compute_iou(voxels_occ_np, occ_hat_np).mean()
 
             eval_dict['iou_voxels'] = iou_voxels
+
+        return eval_dict'''
+
+        
+        # Our Code
+        generator = Generator3D()
+        self.model.eval()
+
+        device = self.device
+        threshold = self.threshold
+        eval_dict = {}
+
+        # Compute elbo
+        points = data.get('points').to(device)
+        occ = data.get('points.occ').to(device)
+
+        inputs = data.get('inputs', torch.empty(points.size(0), 0)).to(device)
+
+        kwargs = {}
+
+        with torch.no_grad():
+            p_out = self.model(points, inputs,
+                               sample=self.eval_sample, **kwargs)
+            probs = p_out.probs
+            occ_pred = (probs >= threshold).float()
+            acc = (occ_pred == occ).sum().float() / occ.numel()
+
+            eval_dict['points_accuracy'] = acc.cpu().numpy()
+
+        #mesh, stats, occ_grid = generator.generate_mesh(data)
+
+
+        # Estimate voxel iou
+        '''voxels_occ = 1 #None
+        if voxels_occ is not None:
+            #voxels_occ = voxels_occ.to(device)
+            points_voxels = make_3d_grid(
+                (-0.5 + 1/64,) * 3, (0.5 - 1/64,) * 3, (32,) * 3)
+            points_voxels = points_voxels.expand(
+                points.size(0), *points_voxels.size())
+            points_voxels = points_voxels.to(device)
+            with torch.no_grad():
+                p_out = self.model(points_voxels, inputs,
+                                   sample=self.eval_sample, **kwargs)
+
+            voxels_occ_np = (voxels_occ >= 0.5).cpu().numpy()
+            occ_hat_np = (p_out.probs >= threshold).cpu().numpy()
+            iou_voxels = compute_iou(voxels_occ_np, occ_hat_np).mean()
+
+            eval_dict['iou_voxels'] = iou_voxels'''
 
         return eval_dict
 

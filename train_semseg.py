@@ -35,11 +35,11 @@ t0 = time.time()
 # Shorthands hardcoded
 root = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/"
 out_dir = "out/semseg/onet"
-batch_size = 32
-backup_every = 100000
+batch_size = 16
+backup_every = 1
 exit_after = args.exit_after
 
-model_selection_metric = "iou"
+model_selection_metric = "points_accuracy"
 model_selection_sign = 1
 
 # Output directory
@@ -128,10 +128,12 @@ print('Total number of parameters: %d' % nparameters)
 while True:
     epoch_it += 1
 #     scheduler.step()
-
+    print("Start sampling")
     for batch in train_loader:
         it += 1
+        print("Start train step")
         loss = trainer.train_step(batch)
+        print("End train step")
         logger.add_scalar('train/loss', loss, it)
         # Print output
         if print_every > 0 and (it % print_every) == 0:

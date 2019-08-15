@@ -14,6 +14,7 @@ from im2mesh.utils.visualize import visualize_data
 from im2mesh.utils.voxels import VoxelGrid
 
 
+
 parser = argparse.ArgumentParser(
     description='Extract meshes from occupancy process.'
 )
@@ -142,7 +143,7 @@ for it, data in enumerate(tqdm(test_loader)):
 
     if generate_mesh:
         t0 = time.time()
-        out = generator.generate_mesh(data)
+        out = generator.generate_mesh(data)[0:2]
         time_dict['mesh'] = time.time() - t0
 
         # Get statistics
