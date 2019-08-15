@@ -1,32 +1,53 @@
+import argparse
 import os
-import itertools
-import random
 
 import numpy as np
 from medpy.io import load
-from torch.utils.data import Dataset, DataLoader
 import torchvision
 import im2mesh.data.ct_transforms as ct_transforms
 import time
 
+
+parser = argparse.ArgumentParser('Sample a watertight mesh.')
+parser.add_argument('in_folder', type=str,
+                    help='ct-images dataset')
+parser.add_argument('--out_folder', type=int,
+                    help='Uniform size of z-dimension.')
+parser.add_argument('--n_proc', type=int, default=0,
+                    help='Number of processes to use.')
+
+parser.add_argument('--voxels_folder', type=str,
+                    help='Output path for voxelization.')
+parser.add_argument('--voxels_res', type=int, default=32,
+                    help='Resolution for voxelization.')
+
+parser.add_argument('--points_folder', type=str,
+                    help='Output path for points.')
+parser.add_argument('--points_size', type=int, default=100000,
+                    help='Size of points.')
+parser.add_argument('--overwrite', action='store_true',
+                    help='Whether to overwrite output.')
+parser.add_argument('--z_size', type=int,
+                    help='Uniform size of z-dimension.')
+
+
 LABEL_SUFFIX = "_label_"  # followed by a number and the file format
 MHA_FORMAT = ".mha"
+BLACKLIST_FILE = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt"
 
 
-class CTImagesDataset(Dataset):
-    def __init__(self, root_dir):
+class CTImages_Preprocessor(object):
+    def __init__(self, root_dir, options):
         """
         Args:
             root_dir (string): Name of directory with the subdirectories for each image.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
         """
+        self.options = options
         self.root_dir = root_dir
         # Only get name, if directory
         self.sub_dirs = [x for x in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, x))]
-        blacklist_file = open("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt", "r")
-        blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
-        blacklist_file.close()
+        with open(BLACKLIST_FILE) as blacklist_file:
+            blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
         # store the path for each viable image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         for sub_dir in self.sub_dirs:
@@ -35,56 +56,47 @@ class CTImagesDataset(Dataset):
             # if(len(allfiles) > 200):
             #    break
             for filename in sub_dir_files:
-                if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (os.path.join(root_dir, sub_dir, filename) not in blacklist):
+                if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (
+                        os.path.join(root_dir, sub_dir, filename) not in blacklist):
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
                     label_filepaths = [os.path.join(self.root_dir, sub_dir, labelname)
-                                        for labelname in sub_dir_files
-                                            if LABEL_SUFFIX in labelname and labelname.endswith(MHA_FORMAT)
-                                                and filename[0:-4] in labelname]
+                                       for labelname in sub_dir_files
+                                       if LABEL_SUFFIX in labelname and labelname.endswith(MHA_FORMAT)
+                                       and filename[0:-4] in labelname]
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
-        
+
         self.allfiles = allfiles
 
-
-    def __len__(self):
+    def num_images(self):
         return len(self.allfiles)
 
-    def __getitem__(self, idx):
-        print("loading item ", idx)
-        start = time.time()
-        image = load(self.allfiles[idx][0])[0].astype('float32')  # only take the image data, not the header
-        after_img_load = time.time()
-        image_shape = image.shape
-        mha_labels = []
-        for labelpath in self.allfiles[idx][1]:
-            mha_labels.append(load(os.path.join(labelpath)))
-        after_label_load = time.time()
-        # To change: offset of labels
-        # labels = self._load_label_masks(mha_labels, image_shape)
+    def preprocess(self):
+        opt = self.options
+        for idx in self.num_images():
+            image = load(self.allfiles[idx][0])[0].astype('float32')  # only take the image data, not the header
+            image_shape = image.shape
+            mha_labels = []
+            for labelpath in self.allfiles[idx][1]:
+                mha_labels.append(load(os.path.join(labelpath)))
 
-        transformations = [ct_transforms.ReplicateBorderPadding3D((640, 448, 512)),
-                           ct_transforms.NaiveRescale((32, 32, 32))]
-        if image_shape[2] > 512:
-            # crop center 512 of z dim
-            transformations.insert(0, ct_transforms.CropZCenter3D(512))
-        # compose all transformations to one
-        image_transform = torchvision.transforms.Compose(transformations)
-        image = image_transform(image)
-        after_img_trans = time.time()
-        #
-        labels = self.determine_offsets(image_shape, mha_labels, 512)
-        after_det_bb = time.time()
-        points, points_occ = self._sample_points_inside_boundingboxes(labels, 1024, image_shape)
-        after_sample = time.time()
+            transformations = [ct_transforms.ReplicateBorderPadding3D((640, 448, opt.z_size)),
+                               ct_transforms.NaiveRescale((32, 32, 32))]
+            if image_shape[2] > opt.z_size:
+                # crop center 512 of z dim
+                transformations.insert(0, ct_transforms.CropZCenter3D(opt.z_size))
+            # compose all transformations to one
+            image_transform = torchvision.transforms.Compose(transformations)
+            image = image_transform(image)
 
-        print("Load img: ", after_img_load-start, "Load labels: ", after_label_load-after_img_load, "Trans: ", after_img_trans-after_label_load, "DetermBB: ", after_det_bb-after_img_trans, "Sample: ", after_sample-after_det_bb)
-        sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
-        return sample
+            labels = self.determine_offsets(image_shape, mha_labels, opt.z_size)
+            points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_size, image_shape)
 
-
+            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
+            sample_name = os.path.basename(self.allfiles[idx][0])[0:-4]
+            self.save_sample(sample, sample_name)
 
     # Determine bounding boxes
     def determine_offsets(self, shape, label_list, z):
@@ -106,7 +118,7 @@ class CTImagesDataset(Dataset):
         y_pad = 14
 
         # If z-dim exceeds z, image will be cropped
-        if shape[2]> z:
+        if shape[2] > z:
             # Calculate the borders of the z_dim
             z_diff = (shape[2] - z) // 2
             begin = z_diff
@@ -121,10 +133,10 @@ class CTImagesDataset(Dataset):
                 z_offset = label[1].offset[2] / voxel_spacing
                 # Offset sometimes off by a very small amount (10^-14)
                 if (z_offset) % 1 > 0:
-                    print("Voxel spacing is not correct, off by: "+ str(z_offset % 1))
+                    print("Voxel spacing is not correct, off by: " + str(z_offset % 1))
                 z_offset = int(round(z_offset))
 
-                #If label is completely inside the cropped image
+                # If label is completely inside the cropped image
                 if z_offset > begin and (z_offset + label[0].shape[2]) < end:
                     # Offset change:
                     # Invert y !!!
@@ -147,7 +159,6 @@ class CTImagesDataset(Dataset):
 
         return offsets_and_labels
 
-
     # label_masks
     def _sample_points_inside_boundingboxes(self, labels, num_points, image_shape):
         """
@@ -158,6 +169,7 @@ class CTImagesDataset(Dataset):
         :return: a list of x,y,z coordinate pairs with length num_points
 
         """
+
         # Needed functions
         def sample_points(num_points, limit_tuple):
             """
@@ -196,7 +208,8 @@ class CTImagesDataset(Dataset):
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
             nearest_points = np.round(nearest_points - offset_array).astype(int)
-            print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]), max(nearest_points[:, 2]))
+            print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]),
+                  max(nearest_points[:, 2]))
             print("Shape: ", shape)
             # Look up occupancy values of points
             return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
@@ -205,12 +218,12 @@ class CTImagesDataset(Dataset):
             """
             Get limits of bounding box of the label inside the image
             :param label: tuple of (new offset, label)
-            :return: 6 tuple with start and end of the bounding box in each dimension
+            :return: 6-tuple with start and end of the bounding box in each dimension
             """
             # print("Better fix than manipulating range?")
             shape = label[1][0].shape
             offset = label[0]
-            x_low = offset[0] -0.49
+            x_low = offset[0] - 0.49
             x_high = offset[0] + shape[0] - 0.51
             # Y is inverted !!!
             y_low = offset[1] - 0.49
@@ -223,15 +236,15 @@ class CTImagesDataset(Dataset):
         num_labels = len(labels)
 
         # If all labels have been discarded:
-        points_per_label = num_points//num_labels  # points per label
+        points_per_label = num_points // num_labels  # points per label
         rest = num_points - points_per_label * num_labels  # if not possible to distribute equally, draw the remaining
-                                                           # ones from the first bounding box
+        # ones from the first bounding box
         points_per_label = [points_per_label for _ in range(num_labels)]
         points_per_label[0] += rest
 
         # sample points from each bounding box
-        all_points = np.array([np.inf, np.inf, np.inf]).reshape(1,3)  # remove dummy entry later
-        all_occ = np.array([np.inf]).reshape(1,)  # remove dummy entry later
+        all_points = np.array([np.inf, np.inf, np.inf]).reshape(1, 3)  # remove dummy entry later
+        all_occ = np.array([np.inf]).reshape(1, )  # remove dummy entry later
         # sample points and occ values for each bounding box/ label
         for i, label in enumerate(labels):
             limit = bounding_box_limit(label)
@@ -247,15 +260,19 @@ class CTImagesDataset(Dataset):
         all_occ = all_occ[1:]
         return all_points, all_occ
 
+    def save_sample(self, sample, sample_name):
+        outpath = os.path.join(self.options.out_folder, sample_name)
+        np.savez(outpath, points=sample['points'], points_occ= sample['points.occ'], inputs= sample['inputs'])
+
+
+def main(args):
+    preprocessor = CTImages_Preprocessor("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/")
+    start = time.time()
+    preprocessor.preprocess()
+    end = time.time()
+    print("Preprocessed", preprocessor.num_images(), "examples in", end-start, "seconds")
+
 
 if __name__ == '__main__':
-    start = time.time()
-    data = CTImagesDataset("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/")
-    counter = 0
-    for datax in data:
-        counter += 1
-        print(counter)
-        if counter >= 20:
-            break
-    end = time.time()
-    print('Runtime:', end-start)
+    args = parser.parse_args()
+    main(args)

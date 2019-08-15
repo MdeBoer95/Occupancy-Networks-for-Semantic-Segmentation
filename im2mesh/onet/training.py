@@ -118,7 +118,7 @@ class Trainer(BaseTrainer):
 
         
         # Our Code
-        generator = Generator3D()
+        #generator = Generator3D()
         self.model.eval()
 
         device = self.device
