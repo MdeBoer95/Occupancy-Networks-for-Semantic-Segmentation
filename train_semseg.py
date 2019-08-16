@@ -9,7 +9,7 @@ import time
 import matplotlib; matplotlib.use('Agg')
 from im2mesh import config, data
 from im2mesh.checkpoints import CheckpointIO
-import im2mesh.data.ct_dataloading_new as ct
+import im2mesh.data.ct_dataloading as ct
 import json
 import math
 
@@ -33,10 +33,10 @@ device = torch.device("cuda" if is_cuda else "cpu")
 t0 = time.time()
 
 # Shorthands hardcoded
-root = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/"
+root = "/visinf/projects_students/VCLabOccNet/preprocessedSamples"
 out_dir = "out/semseg/onet"
-batch_size = 16
-backup_every = 1
+batch_size = 64
+backup_every = 500
 exit_after = args.exit_after
 
 model_selection_metric = "points_accuracy"
@@ -53,8 +53,7 @@ dataset_length = len(dataset)
 train_length = math.floor(0.7*dataset_length)
 val_length = math.ceil(0.1*dataset_length)
 test_length = math.floor(0.2*dataset_length)
-print(len(dataset))
-print(train_length + val_length + test_length)
+print("Dataset lengths:", "Train:", train_length, "Val:", val_length, "Test:", test_length, "Total:", dataset_length)
 train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [train_length, val_length, test_length])
 
 # Loader for train_dataset
@@ -62,8 +61,6 @@ train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=batch_size, num_workers=0, shuffle=True,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
-
-print(len(train_loader.dataset))
 
 
 # Loader for val_dataset
@@ -128,12 +125,9 @@ print('Total number of parameters: %d' % nparameters)
 while True:
     epoch_it += 1
 #     scheduler.step()
-    print("Start sampling")
     for batch in train_loader:
         it += 1
-        print("Start train step")
         loss = trainer.train_step(batch)
-        print("End train step")
         logger.add_scalar('train/loss', loss, it)
         # Print output
         if print_every > 0 and (it % print_every) == 0:

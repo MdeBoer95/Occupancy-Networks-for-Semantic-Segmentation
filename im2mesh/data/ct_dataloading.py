@@ -25,17 +25,16 @@ class CTImagesDataset(Dataset):
         self.sampled_points = sampled_points
 
     def __len__(self):
-        return len(self.self.ctsamplesfiles)
+        return len(self.ctsamplesfiles)
 
     def __getitem__(self, idx):
-        print("called dataloader getitem", idx)
         npzfile = np.load(os.path.join(self.root_dir, self.ctsamplesfiles[idx]))
 
         # draw a subsample of the points
         points = npzfile['points']
         occ = npzfile['points_occ']
         point_indices = np.random.randint(points.shape[0], size=self.sampled_points)
-        points = points[point_indices, :],
+        points = points[point_indices, :]
         occ = occ[point_indices]
 
         sample = {'points': points, 'points.occ': occ, 'inputs': npzfile['inputs']}
@@ -44,12 +43,10 @@ class CTImagesDataset(Dataset):
 
 if __name__ == '__main__':
     start = time.time()
-    data = CTImagesDataset("/visinf/home/mdeboer/occupancy_networks/scripts/testfolder")
+    data = CTImagesDataset("/visinf/projects_students/VCLabOccNet/preprocessedSamples")
     counter = 0
     for datax in data:
         counter += 1
         print(counter)
-        if counter >= 20:
-            break
     end = time.time()
-    print('Runtime:', end-start)
+    print('Runtime for', counter, "samples:", end-start)
