@@ -14,9 +14,7 @@ from im2mesh.data.real import (
     KittiDataset, OnlineProductDataset,
     ImageDataset,
 )
-from im2mesh.data.ct_dataloading import ct_dataloading
-from im2mesh.data.ct_transforms import ct_transforms
-from im2mesh.data.ct_dataloading_new import ct_dataloading_new
+
 
 
 __all__ = [
@@ -40,8 +38,5 @@ __all__ = [
     KittiDataset,
     OnlineProductDataset,
     ImageDataset,
-    # OccNetSemSeg code
-    ct_dataloading
-    ct_transforms
-    ct_dataloading_new
+
 ]
