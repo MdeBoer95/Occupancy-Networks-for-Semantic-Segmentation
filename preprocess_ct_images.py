@@ -7,7 +7,6 @@ import torchvision
 import im2mesh.data.ct_transforms as ct_transforms
 import time
 import math
-import random
 
 parser = argparse.ArgumentParser('Preprocess ct-data.')
 parser.add_argument('--rootdir', type=str, default = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/",
@@ -38,10 +37,7 @@ class CTImages_Preprocessor(object):
         self.options = cmd_options
         self.root_dir = self.options.rootdir
         # Only get name, if directory
-        self.random_seed = 1337
-        random.seed(self.random_seed)
         sub_dirs = [x for x in os.listdir(self.root_dir) if os.path.isdir(os.path.join(self.root_dir, x))]
-        random.shuffle(sub_dirs)
         with open(BLACKLIST_FILE) as blacklist_file:
             blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
         # store the path for each viable image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
@@ -87,7 +83,7 @@ class CTImages_Preprocessor(object):
             if allfiles_number > (self.train_length + self.val_length) and val_flag:
                 self.val_flag = allfiles_number
                 val_flag = False
-        print("Train, val index: ", self.train_length, self.val_length)                
+        print("Train, val index: ", self.train_length, self.val_length)
         self.allfiles = allfiles
 
     def num_images(self):
