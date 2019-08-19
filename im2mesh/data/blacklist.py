@@ -40,14 +40,14 @@ for sub_dir in sub_dirs:
             all_files.append([image_filepath, label_filepaths])
     print("Images in subdir: ", sub_dir, counter)
     imagenumber += counter
-print("Total images: ", imagenumber)    
+print("Total images: ", imagenumber)
 print("Read files: ", time.time() - start)
 # print("Started blacklisting images")
 
 z = 512
 useless_labels = []
 # Check labels, if in cropped image
-''' for paths in all_files:
+for paths in all_files:
     image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
     shape = image.shape
@@ -82,12 +82,13 @@ useless_labels = []
             print("New entry for blacklist: ", paths[0])
 
         print("Runtime: ", time.time() - start)
-        '''
+
+
 
 # Pickle blacklist
 #outfile = open(OUT_FILE, "w+")
 #for image in blacklist:
 #    outfile.write(image)
 #outfile.close()
-#print("Number of blacklisted images: ", len(blacklist))
+print("Number of blacklisted images: ", len(blacklist))
 #print("Blacklisted all images: ", time.time() - start)
