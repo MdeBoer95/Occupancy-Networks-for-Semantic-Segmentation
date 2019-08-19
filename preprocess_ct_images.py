@@ -38,7 +38,8 @@ class CTImages_Preprocessor(object):
         self.options = cmd_options
         self.root_dir = self.options.rootdir
         # Only get name, if directory
-        random.seed(1337)
+        self.random_seed = 1337
+        random.seed(self.random_seed)
         sub_dirs = [x for x in os.listdir(self.root_dir) if os.path.isdir(os.path.join(self.root_dir, x))]
         random.shuffle(sub_dirs)
         with open(BLACKLIST_FILE) as blacklist_file:
@@ -59,8 +60,9 @@ class CTImages_Preprocessor(object):
         self.train_length = math.floor(0.7*file_counter)
         self.val_length = math.ceil(0.1*file_counter)
         self.test_length = math.floor(0.2*file_counter)
-        print(self.train_length)
-
+        allfiles_number = 0
+        train_flag = True
+        val_flag = True
         for sub_dir in sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
 
@@ -68,6 +70,7 @@ class CTImages_Preprocessor(object):
                 if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (
                         os.path.join(self.root_dir, sub_dir, filename) not in blacklist):
 
+                    allfiles_number += 1
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
@@ -78,7 +81,13 @@ class CTImages_Preprocessor(object):
 
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
-
+            if allfiles_number > self.train_length and train_flag:
+                self.train_length = allfiles_number
+                train_flag = False
+            if allfiles_number > (self.train_length + self.val_length) and val_flag:
+                self.val_flag = allfiles_number
+                val_flag = False
+        print("Train, val index: ", self.train_lengthm, self.val_length )                
         self.allfiles = allfiles
 
     def num_images(self):
