@@ -9,9 +9,9 @@ import time
 
 
 parser = argparse.ArgumentParser('Preprocess ct-data.')
-parser.add_argument('--rootdir', type=str,
+parser.add_argument('--rootdir', type=str, default = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/",
                     help='ct-images dataset')
-parser.add_argument('--out_folder', type=str,
+parser.add_argument('--out_folder', type=str, default = "/visinf/projects_students/VCLabOccNet/test",
                     help='Uniform size of z-dimension.')
 #parser.add_argument('--voxels_res', type=int, default=32,
 #                    help='Resolution for voxelization.')
@@ -19,7 +19,7 @@ parser.add_argument('--points_size', type=int, default=100000,
                     help='Size of points.')
 #parser.add_argument('--overwrite', action='store_true',
 #                    help='Whether to overwrite output.')
-parser.add_argument('--z_size', type=int,
+parser.add_argument('--z_size', type=int, default = 512, 
                     help='Uniform size of z-dimension.')
 
 
