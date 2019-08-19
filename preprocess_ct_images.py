@@ -87,7 +87,7 @@ class CTImages_Preprocessor(object):
             if allfiles_number > (self.train_length + self.val_length) and val_flag:
                 self.val_flag = allfiles_number
                 val_flag = False
-        print("Train, val index: ", self.train_lengthm, self.val_length )                
+        print("Train, val index: ", self.train_length, self.val_length)                
         self.allfiles = allfiles
 
     def num_images(self):
