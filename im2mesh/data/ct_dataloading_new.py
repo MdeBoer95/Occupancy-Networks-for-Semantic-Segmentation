@@ -34,8 +34,10 @@ class CTImagesDataset(Dataset):
             # Only for testing: remove this 'if' later
             # if(len(allfiles) > 200):
             #    break
+            counter = 0
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (os.path.join(root_dir, sub_dir, filename) not in blacklist):
+                    counter += 1
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
@@ -45,7 +47,8 @@ class CTImagesDataset(Dataset):
                                                 and filename[0:-4] in labelname]
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
-        
+            print("Number of files in subdir: ", sub_dir, counter)
+
         self.allfiles = allfiles
 
 
@@ -251,11 +254,5 @@ class CTImagesDataset(Dataset):
 if __name__ == '__main__':
     start = time.time()
     data = CTImagesDataset("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/")
-    counter = 0
-    for datax in data:
-        counter += 1
-        print(counter)
-        if counter >= 20:
-            break
     end = time.time()
     print('Runtime:', end-start)
