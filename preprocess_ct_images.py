@@ -6,6 +6,7 @@ from medpy.io import load
 import torchvision
 import im2mesh.data.ct_transforms as ct_transforms
 import time
+import math
 
 
 parser = argparse.ArgumentParser('Preprocess ct-data.')
