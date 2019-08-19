@@ -24,8 +24,10 @@ sub_dirs = [x for x in os.listdir(ROOT) if os.path.isdir(os.path.join(ROOT, x))]
 all_files = []
 for sub_dir in sub_dirs:
     files = os.listdir(os.path.join(ROOT, sub_dir))
+    counter = 0
     for filename in files:
         if filename.endswith(MHA_FORMAT) and LABEL_SUFFIX not in filename:
+            counter += 1
             # Image paths
             image_filepath = os.path.join(ROOT, sub_dir, filename)
             # Label paths
@@ -35,13 +37,14 @@ for sub_dir in sub_dirs:
                                         and filename[0:-4] in labelname]
             # Append paths from found images with corresponding labels
             all_files.append([image_filepath, label_filepaths])
+    print("Images in subdir: ", sub_dir, counter)
 print("Read files: ", time.time() - start)
-print("Started blacklisting images")
+# print("Started blacklisting images")
 
 z = 512
 useless_labels = []
 # Check labels, if in cropped image
-for paths in all_files:
+''' for paths in all_files:
     image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
     shape = image.shape
@@ -76,11 +79,12 @@ for paths in all_files:
             print("New entry for blacklist: ", paths[0])
 
         print("Runtime: ", time.time() - start)
+        '''
 
 # Pickle blacklist
-outfile = open(OUT_FILE, "w+")
-for image in blacklist:
-    outfile.write(image)
-outfile.close()
-print("Number of blacklisted images: ", len(blacklist))
-print("Blacklisted all images: ", time.time() - start)
+#outfile = open(OUT_FILE, "w+")
+#for image in blacklist:
+#    outfile.write(image)
+#outfile.close()
+#print("Number of blacklisted images: ", len(blacklist))
+#print("Blacklisted all images: ", time.time() - start)
