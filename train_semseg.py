@@ -51,11 +51,17 @@ if not os.path.exists(out_dir):
 # 70% train, 10% val, 20% test
 dataset = ct.CTImagesDataset(root)
 dataset_length = len(dataset)
+'''
 train_length = math.floor(0.7*dataset_length)
 val_length = math.ceil(0.1*dataset_length)
 test_length = math.floor(0.2*dataset_length)
 print("Dataset lengths:", "Train:", train_length, "Val:", val_length, "Test:", test_length, "Total:", dataset_length)
 train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [train_length, val_length, test_length])
+'''
+# Numbers from preprocessing script
+train_dataset = dataset[:1776]
+val_dataset = dataset[1776:2035]
+test_dataset = dataset[2035:]
 
 # Loader for train_dataset
 train_loader = torch.utils.data.DataLoader(
