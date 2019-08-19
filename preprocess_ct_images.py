@@ -53,6 +53,7 @@ class CTImages_Preprocessor(object):
                         os.path.join(self.root_dir, sub_dir, filename) not in blacklist):
                     image_counter += 1
                     file_counter += 1
+            print("Images in subdir: ",image_counter)
         self.train_length = math.floor(0.7*file_counter)
         self.val_length = math.ceil(0.1*file_counter)
         self.test_length = math.floor(0.2*file_counter)
@@ -60,11 +61,11 @@ class CTImages_Preprocessor(object):
 
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
-            image_counter = 0
+
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (
                         os.path.join(self.root_dir, sub_dir, filename) not in blacklist):
-                    image_counter += 1
+
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
                     # Label paths
@@ -72,7 +73,7 @@ class CTImages_Preprocessor(object):
                                        for labelname in sub_dir_files
                                        if LABEL_SUFFIX in labelname and labelname.endswith(MHA_FORMAT)
                                        and filename[0:-4] in labelname]
-                    print("Images in subdir: ",image_counter)
+
                     # Append paths from found images with corresponding labels
                     allfiles.append([image_filepath, label_filepaths])
 
