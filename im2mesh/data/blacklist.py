@@ -90,5 +90,8 @@ for paths in all_files:
 #for image in blacklist:
 #    outfile.write(image)
 #outfile.close()
+blacklist_file = open("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt", "r")
+blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
+blacklist_file.close()
 print("Number of blacklisted images: ", len(blacklist))
 #print("Blacklisted all images: ", time.time() - start)
