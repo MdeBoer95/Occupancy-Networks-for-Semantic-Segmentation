@@ -47,6 +47,7 @@ print("Read files: ", time.time() - start)
 z = 512
 useless_labels = []
 # Check labels, if in cropped image
+'''
 for paths in all_files:
     image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
@@ -83,7 +84,7 @@ for paths in all_files:
 
         print("Runtime: ", time.time() - start)
 
-
+'''
 
 # Pickle blacklist
 #outfile = open(OUT_FILE, "w+")
