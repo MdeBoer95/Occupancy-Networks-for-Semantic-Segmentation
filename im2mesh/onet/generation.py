@@ -62,6 +62,7 @@ class Generator3D(object):
         stats_dict = {}
 
         inputs = data.get('inputs', torch.empty(1, 0)).to(device)
+        inputs = inputs[1].unsqueeze(0)
         kwargs = {}
 
         # Preprocess if requires

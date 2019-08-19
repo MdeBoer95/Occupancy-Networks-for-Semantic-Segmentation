@@ -9,6 +9,7 @@ from im2mesh.common import (
 from im2mesh.utils import visualize as vis
 from im2mesh.training import BaseTrainer
 from im2mesh.onet.generation import Generator3D
+import numpy as np
 
 class Trainer(BaseTrainer):
     ''' Trainer object for the Occupancy Network.
@@ -48,6 +49,7 @@ class Trainer(BaseTrainer):
         loss = self.compute_loss(data)
         loss.backward()
         self.optimizer.step()
+
         return loss.item()
 
     def eval_step(self, data):
@@ -118,31 +120,39 @@ class Trainer(BaseTrainer):
 
         
         # Our Code
-        #generator = Generator3D()
+        device = self.device
+        generator = Generator3D(self.model, device=device)
         self.model.eval()
 
-        device = self.device
         threshold = self.threshold
         eval_dict = {}
 
         # Compute elbo
-        points = data.get('points').to(device)
-        occ = data.get('points.occ').to(device)
-
-        inputs = data.get('inputs', torch.empty(points.size(0), 0)).to(device)
-
-        kwargs = {}
-
         with torch.no_grad():
+            points = data.get('points').to(device)
+            occ = data.get('points.occ').to(device)
+
+            inputs = data.get('inputs', torch.empty(points.size(0), 0)).to(device)
+
+            kwargs = {}
+
+
             p_out = self.model(points, inputs,
                                sample=self.eval_sample, **kwargs)
             probs = p_out.probs
             occ_pred = (probs >= threshold).float()
             acc = (occ_pred == occ).sum().float() / occ.numel()
+            acc = acc.cpu().numpy()
+            metrics = self.confusion(occ, occ_pred)
+            eval_dict['points_accuracy'] = acc
+            eval_dict['tp'] = np.array(metrics[0])
+            eval_dict['fp'] = np.array(metrics[1])
+            eval_dict['tn'] = np.array(metrics[2])
+            eval_dict['fn'] = np.array(metrics[3])
+            eval_dict['precision'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fp'])
+            eval_dict['recall'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fn'])
 
-            eval_dict['points_accuracy'] = acc.cpu().numpy()
-
-        #mesh, stats, occ_grid = generator.generate_mesh(data)
+        mesh, stats, occ_grid = generator.generate_mesh(data)
 
 
         # Estimate voxel iou
@@ -223,3 +233,48 @@ class Trainer(BaseTrainer):
         loss = loss + loss_i.sum(-1).mean()
 
         return loss
+
+    def perf_measure(self, y_actual, y_hat):
+        TP = 0
+        FP = 0
+        TN = 0
+        FN = 0
+        for sample_id in range(y_hat.size(0)):
+            for i in range(y_hat.size(1)):
+                if y_actual[sample_id, i] == y_hat[i] == 1:
+                    TP += 1
+                if y_hat[i] == 1 and y_actual[i] != y_hat[i]:
+                    FP += 1
+                if y_actual[i] == y_hat[i] == 0:
+                    TN += 1
+                if y_hat[i] == 0 and y_actual[i] != y_hat[i]:
+                    FN += 1
+
+        ACC = (TP + TN) / (TP + FP + FN + TN)
+        return TP, FP, TN, FN, ACC
+
+    def confusion(self, prediction, truth):
+        """ Returns the confusion matrix for the values in the `prediction` and `truth`
+        tensors, i.e. the amount of positions where the values of `prediction`
+        and `truth` are
+        - 1 and 1 (True Positive)
+        - 1 and 0 (False Positive)
+        - 0 and 0 (True Negative)
+        - 0 and 1 (False Negative)
+        """
+
+        confusion_vector = prediction / truth
+        # Element-wise division of the 2 tensors returns a new tensor which holds a
+        # unique value for each case:
+        #   1     where prediction and truth are 1 (True Positive)
+        #   inf   where prediction is 1 and truth is 0 (False Positive)
+        #   nan   where prediction and truth are 0 (True Negative)
+        #   0     where prediction is 0 and truth is 1 (False Negative)
+
+        true_positives = torch.sum(confusion_vector == 1).item()
+        false_positives = torch.sum(confusion_vector == float('inf')).item()
+        true_negatives = torch.sum(torch.isnan(confusion_vector)).item()
+        false_negatives = torch.sum(confusion_vector == 0).item()
+
+        acc = (true_positives + true_negatives) / (true_positives + false_positives + false_negatives + true_negatives)
+        return true_positives, false_positives, true_negatives, false_negatives, acc
