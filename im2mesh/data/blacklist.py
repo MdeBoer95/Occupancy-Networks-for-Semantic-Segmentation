@@ -47,7 +47,7 @@ print("Read files: ", time.time() - start)
 z = 512
 useless_labels = []
 # Check labels, if in cropped image
-'''
+
 for paths in all_files:
     image = load(paths[0])[0].astype('float32')
     # Check, if image will be cropped:
@@ -84,15 +84,11 @@ for paths in all_files:
 
         print("Runtime: ", time.time() - start)
 
-'''
+
 
 # Pickle blacklist
 #outfile = open(OUT_FILE, "w+")
 #for image in blacklist:
 #    outfile.write(image)
 #outfile.close()
-blacklist_file = open("/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/blacklist.txt", "r")
-blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
-blacklist_file.close()
-print("Number of blacklisted images: ", len(blacklist))
 #print("Blacklisted all images: ", time.time() - start)
