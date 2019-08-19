@@ -234,25 +234,6 @@ class Trainer(BaseTrainer):
 
         return loss
 
-    def perf_measure(self, y_actual, y_hat):
-        TP = 0
-        FP = 0
-        TN = 0
-        FN = 0
-        for sample_id in range(y_hat.size(0)):
-            for i in range(y_hat.size(1)):
-                if y_actual[sample_id, i] == y_hat[i] == 1:
-                    TP += 1
-                if y_hat[i] == 1 and y_actual[i] != y_hat[i]:
-                    FP += 1
-                if y_actual[i] == y_hat[i] == 0:
-                    TN += 1
-                if y_hat[i] == 0 and y_actual[i] != y_hat[i]:
-                    FN += 1
-
-        ACC = (TP + TN) / (TP + FP + FN + TN)
-        return TP, FP, TN, FN, ACC
-
     def confusion(self, prediction, truth):
         """ Returns the confusion matrix for the values in the `prediction` and `truth`
         tensors, i.e. the amount of positions where the values of `prediction`
