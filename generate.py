@@ -143,7 +143,7 @@ for it, data in enumerate(tqdm(test_loader)):
 
     if generate_mesh:
         t0 = time.time()
-        out = generator.generate_mesh(data)[0:2]
+        out = generator.generate_mesh(data)[0]
         time_dict['mesh'] = time.time() - t0
 
         # Get statistics

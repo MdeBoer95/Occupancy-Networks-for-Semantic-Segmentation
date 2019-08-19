@@ -12,8 +12,8 @@ from im2mesh.checkpoints import CheckpointIO
 import im2mesh.data.ct_dataloading as ct
 import json
 import math
-
-
+import csv
+import warnings
 
 # Arguments
 parser = argparse.ArgumentParser(
@@ -38,6 +38,7 @@ out_dir = "out/semseg/onet"
 batch_size = 64
 backup_every = 500
 exit_after = args.exit_after
+epoch_limit = 1000000
 
 model_selection_metric = "points_accuracy"
 model_selection_sign = 1
@@ -122,6 +123,10 @@ nparameters = sum(p.numel() for p in model.parameters())
 # print(model)
 print('Total number of parameters: %d' % nparameters)
 
+metric_log_path = "metric_log"
+if os.path.exists(metric_log_path) and not os.stat(metric_log_path).st_size == 0:
+    warnings.warn("Metric log file: \"" + metric_log_path + "\" already exists and is not empty.")
+
 while True:
     epoch_it += 1
 #     scheduler.step()
@@ -153,6 +158,17 @@ while True:
         # Run validation
         if validate_every > 0 and (it % validate_every) == 0:
             eval_dict = trainer.evaluate(val_loader)
+
+            with open(metric_log_path, 'a') as metric_log_file:
+                metric_logger = csv.writer(metric_log_file)
+                if os.stat(metric_log_path).st_size == 0:
+                    header = list(eval_dict.keys())
+                    header.insert(0, 'iteration')
+                    metric_logger.writerow(header)
+                row = list(eval_dict.values())
+                row.insert(0, it)
+                metric_logger.writerow(row)
+
             metric_val = eval_dict[model_selection_metric]
             print('Validation metric (%s): %.4f'
                   % (model_selection_metric, metric_val))
@@ -167,8 +183,9 @@ while True:
                                    loss_val_best=metric_val_best)
 
         # Exit if necessary
-        if exit_after > 0 and (time.time() - t0) >= exit_after:
+        if exit_after > 0 and (time.time() - t0) >= exit_after or epoch_it >= epoch_limit:
             print('Time limit reached. Exiting.')
             checkpoint_io.save('model.pt', epoch_it=epoch_it, it=it,
                                loss_val_best=metric_val_best)
+            metric_log_file.close()
             exit(3)
