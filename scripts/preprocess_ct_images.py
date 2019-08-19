@@ -4,7 +4,7 @@ import os
 import numpy as np
 from medpy.io import load
 import torchvision
-import im2mesh.data.ct_transforms as ct_transforms
+from im2mesh.data import ct_transforms
 import time
 
 
