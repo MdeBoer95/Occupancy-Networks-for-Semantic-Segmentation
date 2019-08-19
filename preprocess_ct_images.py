@@ -39,14 +39,15 @@ class CTImages_Preprocessor(object):
         self.root_dir = self.options.rootdir
         # Only get name, if directory
         random.seed(1337)
-        self.sub_dirs = random.shuffle([x for x in os.listdir(self.root_dir) if os.path.isdir(os.path.join(self.root_dir, x))])
+        sub_dirs = [x for x in os.listdir(self.root_dir) if os.path.isdir(os.path.join(self.root_dir, x))]
+        random.shuffle(sub_dirs)
         with open(BLACKLIST_FILE) as blacklist_file:
             blacklist = blacklist_file.read().replace(".mha", ".mha,").split(',')[:-1]
         # store the path for each viable image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         # get counters for training/validation/test set
         file_counter = 0
-        for sub_dir in self.sub_dirs:
+        for sub_dir in sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
             image_counter = 0
             for filename in sub_dir_files:
@@ -60,7 +61,7 @@ class CTImages_Preprocessor(object):
         self.test_length = math.floor(0.2*file_counter)
         print(self.train_length)
 
-        for sub_dir in self.sub_dirs:
+        for sub_dir in sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
 
             for filename in sub_dir_files:
