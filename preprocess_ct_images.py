@@ -110,7 +110,7 @@ class CTImages_Preprocessor(object):
             labels = self.determine_offsets(image_shape, mha_labels, opt.z_size)
             points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_size, image_shape)
 
-            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image}
+            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image, 'labels': labels}
             sample_name = os.path.basename(self.allfiles[idx][0])[0:-4]
             self.save_sample(sample, sample_name)
 
