@@ -22,6 +22,7 @@ OUT_FILE = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20
 sub_dirs = [x for x in os.listdir(ROOT) if os.path.isdir(os.path.join(ROOT, x))]
 # store the path for each image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
 all_files = []
+imagenumber = 0
 for sub_dir in sub_dirs:
     files = os.listdir(os.path.join(ROOT, sub_dir))
     counter = 0
@@ -38,6 +39,8 @@ for sub_dir in sub_dirs:
             # Append paths from found images with corresponding labels
             all_files.append([image_filepath, label_filepaths])
     print("Images in subdir: ", sub_dir, counter)
+    imagenumber += counter
+print("Total images: ", imagenumber)    
 print("Read files: ", time.time() - start)
 # print("Started blacklisting images")
 
