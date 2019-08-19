@@ -19,7 +19,7 @@ parser.add_argument('--points_size', type=int, default=100000,
                     help='Size of points.')
 #parser.add_argument('--overwrite', action='store_true',
 #                    help='Whether to overwrite output.')
-parser.add_argument('--z_size', type=int, default = 512, 
+parser.add_argument('--z_size', type=int, default = 512,
                     help='Uniform size of z-dimension.')
 
 
@@ -43,10 +43,23 @@ class CTImages_Preprocessor(object):
         # store the path for each viable image and it's labels in a list [ [imagepath, [labelpath1, labelpath2, ...]] ]
         allfiles = []
         # get counters for training/validation/test set
+        file_counter = 0
+        for sub_dir in self.sub_dirs:
+            sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
+            image_counter = 0
+            for filename in sub_dir_files:
+                if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (
+                        os.path.join(self.root_dir, sub_dir, filename) not in blacklist):
+                    image_counter += 1
+                    file_counter += 1
+        train_length = math.floor(0.7*file_counter)
+        val_length = math.ceil(0.1*file_counter)
+        test_length = math.floor(0.2*file_counter)
+
 
         for sub_dir in self.sub_dirs:
             sub_dir_files = os.listdir(os.path.join(self.root_dir, sub_dir))
-            iamge_counter = 0
+            image_counter = 0
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (
                         os.path.join(self.root_dir, sub_dir, filename) not in blacklist):
