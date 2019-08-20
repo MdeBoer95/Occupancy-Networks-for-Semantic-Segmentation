@@ -109,11 +109,25 @@ class CTImages_Preprocessor(object):
 
             labels = self.determine_offsets(image_shape, mha_labels, opt.z_size)
             points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_size, image_shape)
+            print("merged labels: ", merge_labels(labels, image_shape))
 
-            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image, 'labels': labels}
+            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image, 'labels': merge_labels(labels, image_shape)}
             sample_name = os.path.basename(self.allfiles[idx][0])[0:-4]
             self.save_sample(sample, sample_name)
 
+    def merge_labels(self, label_list, image_shape):
+        """
+        Merge the labels with a null array of the size of the image shape
+        :param labels: A list of tuples of (new offset, label) for each label
+        :param image_shape: the shape of the image
+        :return: Bit array, with 1 representing part of weapon
+        """
+        merged = np.zeros(image_shape, dtype=int)
+        for label in label_list:
+            label_box = label[1][0]
+            label_offset = label[0]
+            merged[label_offset[0]:label_offset[0]+label_box.shape[0], label_offset[1]:label_offset[1]+label_box.shape[1], label_offset[2]:label_offset[2]+label_box.shape[2]] = label_box
+        return merged
     # Determine bounding boxes
     def determine_offsets(self, shape, label_list, z):
         """
