@@ -109,7 +109,7 @@ class CTImages_Preprocessor(object):
 
             labels = self.determine_offsets(image_shape, mha_labels, opt.z_size)
             points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_size, image_shape)
-            print("merged labels: ", self.merge_labels(labels, image_shape))
+            #print("merged labels: ", self.merge_labels(labels, image_shape))
 
             sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image, 'labels': self.merge_labels(labels, image_shape)}
             sample_name = os.path.basename(self.allfiles[idx][0])[0:-4]
@@ -126,7 +126,7 @@ class CTImages_Preprocessor(object):
         for label in label_list:
             label_box = label[1][0]
             label_offset = np.array(label[0]).astype(int)
-            print(label_offset)
+            #print(label_offset)
             merged[label_offset[0]:label_offset[0]+label_box.shape[0], label_offset[1]:label_offset[1]+label_box.shape[1], label_offset[2]:label_offset[2]+label_box.shape[2]] = label_box
         return merged
     # Determine bounding boxes
@@ -239,9 +239,9 @@ class CTImages_Preprocessor(object):
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
             nearest_points = np.round(nearest_points - offset_array).astype(int)
-            print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]),
+            #print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]),
                   max(nearest_points[:, 2]))
-            print("Shape: ", shape)
+            #print("Shape: ", shape)
             # Look up occupancy values of points
             return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
