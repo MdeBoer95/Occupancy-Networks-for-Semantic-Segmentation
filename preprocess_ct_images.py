@@ -125,7 +125,7 @@ class CTImages_Preprocessor(object):
         merged = np.zeros(image_shape, dtype=int)
         for label in label_list:
             label_box = label[1][0]
-            label_offset = label[0].astype(int)
+            label_offset = np.array(label[0]).astype(int)
             print(label_offset)
             merged[label_offset[0]:label_offset[0]+label_box.shape[0], label_offset[1]:label_offset[1]+label_box.shape[1], label_offset[2]:label_offset[2]+label_box.shape[2]] = label_box
         return merged
