@@ -111,7 +111,7 @@ class CTImages_Preprocessor(object):
             points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_size, image_shape)
             #print("merged labels: ", self.merge_labels(labels, image_shape))
 
-            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image, 'labels': self.merge_labels(labels, image_shape)}
+            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image, 'labels': labels)}
             sample_name = os.path.basename(self.allfiles[idx][0])[0:-4]
             self.save_sample(sample, sample_name)
 
@@ -173,7 +173,6 @@ class CTImages_Preprocessor(object):
                 # If label is completely inside the cropped image
                 if z_offset > begin and (z_offset + label[0].shape[2]) < end:
                     # Offset change:
-                    # Invert y !!!
                     offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset + z_diff]
                     offsets_and_labels.append((offset, label))
         # Else: Label will be discarded
@@ -295,8 +294,7 @@ class CTImages_Preprocessor(object):
 
     def save_sample(self, sample, sample_name):
         outpath = os.path.join(self.options.out_folder, sample_name)
-        np.savez(outpath, data=0)
-                 #points=sample['points'], points_occ= sample['points.occ'], inputs= sample['inputs'], labels = sample['labels'])
+        np.savez(outpath, points=sample['points'], points_occ= sample['points.occ'], inputs= sample['inputs'], labels = sample['labels'])
         print("Saved file: ", outpath)
 
 
