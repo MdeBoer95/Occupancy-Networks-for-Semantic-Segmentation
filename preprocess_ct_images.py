@@ -127,8 +127,9 @@ class CTImages_Preprocessor(object):
             label_box = label[1][0]
             label_offset = np.array(label[0]).astype(int)
             #print(label_offset)
-            merged[label_offset[0]:label_offset[0]+label_box.shape[0], label_offset[1]:label_offset[1]+label_box.shape[1], label_offset[2]:label_offset[2]+label_box.shape[2]] = label_box
-        return merged
+            print(merged[label_offset[0]:label_offset[0]+label_box.shape[0], label_offset[1]:label_offset[1]+label_box.shape[1], label_offset[2]:label_offset[2]+label_box.shape[2]].shape)
+            print(label_box.shape)
+        return 0
     # Determine bounding boxes
     def determine_offsets(self, shape, label_list, z):
         """
