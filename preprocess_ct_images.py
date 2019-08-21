@@ -127,8 +127,10 @@ class CTImages_Preprocessor(object):
             label_box = label[1][0]
             label_offset = np.array(label[0]).astype(int)
             #print(label_offset)
-            print(merged[label_offset[0]:label_offset[0]+label_box.shape[0], label_offset[1]:label_offset[1]+label_box.shape[1], label_offset[2]:label_offset[2]+label_box.shape[2]].shape)
-            print(label_box.shape)
+            if merged[label_offset[0]:label_offset[0]+label_box.shape[0], label_offset[1]:label_offset[1]+label_box.shape[1], label_offset[2]:label_offset[2]+label_box.shape[2]].shape == label_box.shape:
+                print("all good")
+            else:
+                print("ERROR")
         return 0
     # Determine bounding boxes
     def determine_offsets(self, shape, label_list, z):
@@ -293,7 +295,7 @@ class CTImages_Preprocessor(object):
 
     def save_sample(self, sample, sample_name):
         outpath = os.path.join(self.options.out_folder, sample_name)
-        np.savez(outpath, data=0) 
+        np.savez(outpath, data=0)
                  #points=sample['points'], points_occ= sample['points.occ'], inputs= sample['inputs'], labels = sample['labels'])
         print("Saved file: ", outpath)
 
