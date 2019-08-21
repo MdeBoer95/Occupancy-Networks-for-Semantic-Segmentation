@@ -187,7 +187,7 @@ class CTImages_Preprocessor(object):
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
                 # Invert y
                 offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset + z_pad]
-                offsets_and_labels.append([offset, label[1][0]])
+                offsets_and_labels.append([offset, label[0]])
 
         return offsets_and_labels
 
