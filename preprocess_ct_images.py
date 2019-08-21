@@ -14,7 +14,7 @@ parser.add_argument('--rootdir', type=str, default = "/visinf/projects_students/
 parser.add_argument('--out_folder', type=str, default = "/visinf/projects_students/VCLabOccNet/test",
                     help='Uniform size of z-dimension.')
 #parser.add_argument('--voxels_res', type=int, default=32,
-#                    help='Resolution for voxelization.')
+#                    help='Resolution for voxelization.')/
 parser.add_argument('--points_size', type=int, default=100000,
                     help='Size of points.')
 #parser.add_argument('--overwrite', action='store_true',
@@ -239,8 +239,7 @@ class CTImages_Preprocessor(object):
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
             nearest_points = np.round(nearest_points - offset_array).astype(int)
-            #print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]),
-                  max(nearest_points[:, 2]))
+            #print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]), max(nearest_points[:, 2]))
             #print("Shape: ", shape)
             # Look up occupancy values of points
             return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
