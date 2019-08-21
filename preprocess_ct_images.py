@@ -292,7 +292,7 @@ class CTImages_Preprocessor(object):
 
     def save_sample(self, sample, sample_name):
         outpath = os.path.join(self.options.out_folder, sample_name)
-        np.savez(outpath, points=sample['points'], points_occ= sample['points.occ'], inputs= sample['inputs'])
+        np.savez(outpath, points=sample['points'], points_occ= sample['points.occ'], inputs= sample['inputs'], labels = sample['labels'])
 
 
 def main(args):
