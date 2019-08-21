@@ -109,7 +109,6 @@ class CTImages_Preprocessor(object):
 
             labels = self.determine_offsets(image_shape, mha_labels, opt.z_size)
             points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_size, image_shape)
-            #print("merged labels: ", self.merge_labels(labels, image_shape))
 
             sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image, 'labels': labels}
             sample_name = os.path.basename(self.allfiles[idx][0])[0:-4]
@@ -188,7 +187,7 @@ class CTImages_Preprocessor(object):
                 z_offset = int(round(label[1].offset[2] / voxel_spacing))
                 # Invert y
                 offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset + z_pad]
-                offsets_and_labels.append((offset, label))
+                offsets_and_labels.append([offset, label])
 
         return offsets_and_labels
 
