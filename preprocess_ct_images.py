@@ -231,8 +231,8 @@ class CTImages_Preprocessor(object):
             offset = label[0]
             # print("Offset: ", offset)
             # Label shape
-            shape = label[1][0].shape
-            # print("Shape: ", shape)
+            shape = label[1].shape
+            print("Shape: ", shape)
             # Array with one offset for each point in points
             offset_array = np.empty(points.shape)
             offset_array[:] = np.array(offset)
@@ -243,7 +243,7 @@ class CTImages_Preprocessor(object):
             #print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]), max(nearest_points[:, 2]))
             #print("Shape: ", shape)
             # Look up occupancy values of points
-            return label[1][0][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
+            return label[1][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
         def bounding_box_limit(label):
             """
@@ -252,7 +252,7 @@ class CTImages_Preprocessor(object):
             :return: 6-tuple with start and end of the bounding box in each dimension
             """
             # print("Better fix than manipulating range?")
-            shape = label[1][0].shape
+            shape = label[1].shape
             offset = label[0]
             x_low = offset[0] - 0.49
             x_high = offset[0] + shape[0] - 0.51
