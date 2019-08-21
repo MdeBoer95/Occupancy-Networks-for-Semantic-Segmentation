@@ -188,7 +188,7 @@ class CTImages_Preprocessor(object):
                 # Invert y
                 offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset + z_pad]
                 offsets_and_labels.append([offset, label[0]])
-                print(label[0])
+                #print(label[0])
 
         return offsets_and_labels
 
@@ -233,7 +233,7 @@ class CTImages_Preprocessor(object):
             # print("Offset: ", offset)
             # Label shape
             shape = label[1].shape
-            print("Shape: ", shape)
+            #print("Shape: ", shape)
             # Array with one offset for each point in points
             offset_array = np.empty(points.shape)
             offset_array[:] = np.array(offset)

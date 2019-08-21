@@ -59,9 +59,9 @@ print("Dataset lengths:", "Train:", train_length, "Val:", val_length, "Test:", t
 train_dataset, val_dataset, test_dataset = torch_data.random_split(dataset, [train_length, val_length, test_length])
 '''
 # Numbers from preprocessing script
-train_dataset = dataset[:1776]
-val_dataset = dataset[1776:2035]
-test_dataset = dataset[2035:]
+train_dataset = dataset[:1775]
+val_dataset = dataset[1775:2034]
+test_dataset = dataset[2034:]
 
 # Loader for train_dataset
 train_loader = torch.utils.data.DataLoader(
