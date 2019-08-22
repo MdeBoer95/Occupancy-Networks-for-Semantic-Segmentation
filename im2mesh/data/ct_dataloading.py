@@ -39,7 +39,7 @@ class CTImagesDataset(Dataset):
 
 
 
-        sample = {'points': points, 'points.occ': occ, 'inputs': npzfile['inputs']}, 'labels': npzfile['labels']}
+        sample = {'points': points, 'points.occ': occ, 'inputs': npzfile['inputs'], 'labels': npzfile['labels']}
         return sample
 
 
