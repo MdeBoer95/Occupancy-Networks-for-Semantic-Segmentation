@@ -105,8 +105,6 @@ class Generator3D(object):
             pointsf = box_size * make_3d_grid(
                 (0,)*3, (32,)*3, (nx,)*3
             )
-            for points in pointsf:
-                print(points)
             values = self.eval_points(pointsf, z, c, **kwargs).cpu().numpy()
             value_grid = values.reshape(nx, nx, nx)
         else:

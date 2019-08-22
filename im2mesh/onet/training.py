@@ -153,13 +153,13 @@ class Trainer(BaseTrainer):
             eval_dict['fn'] = np.array(metrics[3])
             eval_dict['precision'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fp'])
             eval_dict['recall'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fn'])
-                      
+
 
         # Value grid
         mesh, stats, occ_grid = generator.generate_mesh(data)
         # Shape: 129^3
-        print("Max: ", np.max(occ_grid))
-        print("Min: ", np.min(occ_grid))
+        #print("Max: ", np.max(occ_grid))
+        #print("Min: ", np.min(occ_grid))
         '''
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?
