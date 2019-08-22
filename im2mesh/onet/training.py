@@ -128,6 +128,8 @@ class Trainer(BaseTrainer):
         eval_dict = {}
 
         # Compute elbo
+
+        # Only sampled points evaluation:
         with torch.no_grad():
             points = data.get('points').to(device)
             occ = data.get('points.occ').to(device)
@@ -154,7 +156,11 @@ class Trainer(BaseTrainer):
 
         # Value grid
         mesh, stats, occ_grid = generator.generate_mesh(data)
-        print(occ_grid.shape)
+        # Shape: 129^3
+        # Recalculate threshold
+        threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?
+        occ_grid_pred = 0
+
 
 
         # Estimate voxel iou

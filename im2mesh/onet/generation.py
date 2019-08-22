@@ -95,6 +95,7 @@ class Generator3D(object):
             stats_dict (dict): stats dictionary
         '''
         threshold = np.log(self.threshold) - np.log(1. - self.threshold)
+        print(threshold)
 
         t0 = time.time()
         # Compute bounding box size
@@ -139,7 +140,7 @@ class Generator3D(object):
         ''' Evaluates the occupancy values for the points.
 
         Args:
-            p (tensor): points 
+            p (tensor): points
             z (tensor): latent code z
             c (tensor): latent conditioned code c
         '''
@@ -251,7 +252,7 @@ class Generator3D(object):
     def refine_mesh(self, mesh, occ_hat, z, c=None):
         ''' Refines the predicted mesh.
 
-        Args:   
+        Args:
             mesh (trimesh object): predicted mesh
             occ_hat (tensor): predicted occupancy grid
             z (tensor): latent code z
