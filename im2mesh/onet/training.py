@@ -118,7 +118,7 @@ class Trainer(BaseTrainer):
 
         return eval_dict'''
 
-        
+
         # Our Code
         device = self.device
         generator = Generator3D(self.model, device=device)
@@ -151,8 +151,9 @@ class Trainer(BaseTrainer):
             eval_dict['fn'] = np.array(metrics[3])
             eval_dict['precision'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fp'])
             eval_dict['recall'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fn'])
-
+        # Value grid
         mesh, stats, occ_grid = generator.generate_mesh(data)
+        print(occ_grid)
 
 
         # Estimate voxel iou
