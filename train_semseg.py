@@ -64,7 +64,7 @@ val_dataset = torch_data.Subset(dataset, list(range(1775, 2034)))
 test_dataset = torch_data.Subset(dataset, list(range(2034, dataset_length)))
 # Loader for train_dataset
 train_loader = torch.utils.data.DataLoader(
-    train_dataset, batch_size=batch_size, num_workers=0, shuffle=True,
+    train_dataset, batch_size=batch_size, num_workers=4, shuffle=True,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
 
