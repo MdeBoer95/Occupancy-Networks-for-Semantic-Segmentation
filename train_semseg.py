@@ -177,6 +177,10 @@ while True:
             metric_val = eval_dict[model_selection_metric]
             print('Validation metric (%s): %.4f'
                   % (model_selection_metric, metric_val))
+            print('TP:', eval_dict['tp'])
+            print('FP:', eval_dict['fp'])
+            print('FN:', eval_dict['fn'])
+            print('TN:', eval_dict['tn'])
 
             for k, v in eval_dict.items():
                 logger.add_scalar('val/%s' % k, v, it)

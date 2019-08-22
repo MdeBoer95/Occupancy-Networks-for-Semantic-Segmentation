@@ -15,7 +15,7 @@ data:
   model_file: model.off
   watertight_file: model_watertight.off
   img_folder: img
-  img_size: 224 
+  img_size: 224
   img_with_camera: false
   img_augment: false
   n_views: 24
@@ -44,7 +44,7 @@ training:
   print_every: 10
   visualize_every: 2000
   checkpoint_every: 1000
-  validate_every: 1
+  validate_every: 100
   backup_every: 100000
   eval_sample: false
   model_selection_metric: loss
