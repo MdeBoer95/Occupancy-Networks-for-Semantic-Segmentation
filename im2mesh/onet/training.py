@@ -159,10 +159,8 @@ class Trainer(BaseTrainer):
         # Shape: 129^3
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?
-        occ_grid_pred = 0
-
-
-
+        occ_grid_pred = (occ_grid >= threshold_grid) * occ_grid
+        print(occ_grid_pred)
         # Estimate voxel iou
         '''voxels_occ = 1 #None
         if voxels_occ is not None:
