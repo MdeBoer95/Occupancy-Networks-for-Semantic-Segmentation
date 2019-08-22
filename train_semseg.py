@@ -33,7 +33,7 @@ device = torch.device("cuda" if is_cuda else "cpu")
 t0 = time.time()
 
 # Shorthands hardcoded
-root = "/visinf/projects_students/VCLabOccNet/preprocessedSamples"
+root = "/visinf/projects_students/VCLabOccNet/test"
 out_dir = "out/semseg/onet"
 batch_size = 64
 backup_every = 500
