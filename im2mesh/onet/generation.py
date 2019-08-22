@@ -33,7 +33,7 @@ class Generator3D(object):
 
     def __init__(self, model, points_batch_size=100000,
                  threshold=0.5, refinement_step=0, device=None,
-                 resolution0=32, upsampling_steps=3,
+                 resolution0=32, upsampling_steps=0,
                  with_normals=False, padding=0.1, sample=False,
                  simplify_nfaces=None,
                  preprocessor=None):
@@ -63,9 +63,6 @@ class Generator3D(object):
 
         inputs = data.get('inputs', torch.empty(1, 0)).to(device)
         inputs = inputs[1].unsqueeze(0)
-        print(inputs.shape)
-        print(torch.min(inputs))
-        print(torch.max(inputs))
         kwargs = {}
 
         # Preprocess if requires
@@ -106,7 +103,7 @@ class Generator3D(object):
         if self.upsampling_steps == 0:
             nx = self.resolution0
             pointsf = box_size * make_3d_grid(
-                (0,)*3, (1,)*3, (nx,)*3
+                (-0.5,)*3, (0.5,)*3, (nx,)*3
             )
             print(pointsf)
             values = self.eval_points(pointsf, z, c, **kwargs).cpu().numpy()
