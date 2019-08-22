@@ -37,13 +37,14 @@ class CTImagesDataset(Dataset):
         points = points[point_indices, :]
         occ = occ[point_indices]
 
-        sample = {'points': points, 'points.occ': occ, 'inputs': npzfile['inputs']}
+
+        sample = {'points': points, 'points.occ': occ, 'inputs': npzfile['inputs'], 'labels': npzfile['labels']}
         return sample
 
 
 if __name__ == '__main__':
     start = time.time()
-    data = CTImagesDataset("/visinf/projects_students/VCLabOccNet/preprocessedSamples")
+    data = CTImagesDataset("/visinf/projects_students/VCLabOccNet/test")
     counter = 0
     for datax in data:
         counter += 1
