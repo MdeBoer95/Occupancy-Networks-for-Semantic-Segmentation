@@ -114,6 +114,8 @@ class CTImages_Preprocessor(object):
             sample_name = os.path.basename(self.allfiles[idx][0])[0:-4]
             self.save_sample(sample, sample_name)
 
+    '''
+    Files too huge
     def merge_labels(self, label_list, image_shape):
         """
         Merge the labels with a null array of the size of the image shape
@@ -131,6 +133,7 @@ class CTImages_Preprocessor(object):
             else:
                 print("ERROR")
         return 0
+    '''
     # Determine bounding boxes
     def determine_offsets(self, shape, label_list, z):
         """
