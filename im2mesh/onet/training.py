@@ -157,9 +157,25 @@ class Trainer(BaseTrainer):
 
         # Value grid
         mesh, stats, occ_grid = generator.generate_mesh(data)
-        # Shape: 129^3
-        #print("Max: ", np.max(occ_grid))
-        #print("Min: ", np.min(occ_grid))
+
+        # calculate IoU
+
+        # remove padding from grid
+        occ_pred = (occ_grid >= threshold).astype(int)[:640, :448, :512]
+        offset = data.get('label_offset')[1].numpy().astype(int)
+        shape = data.get('label_shape')[1].numpy()
+        # get the part from occ_grid where the label should be
+        occ_pred_label = \
+            occ_pred[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]]
+        # remove padding from label
+        label = data.get('padded_label')[1].numpy()[:shape[0], :shape[1], :shape[2]]
+        assert(label.shape == occ_pred_label.shape)
+        smooth = 1e-6
+        eval_dict['iou'] = ((label & occ_pred_label).sum() + smooth) / ((label | occ_pred_label).sum() + smooth)
+
+
+
+
         '''
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?

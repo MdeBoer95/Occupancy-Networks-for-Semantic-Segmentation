@@ -24,9 +24,11 @@ cdef struct GridPoint:
     bint known
 
 
-cdef inline unsigned long vec_to_idx(Vector3D coord, long resolution):
+cdef inline unsigned long vec_to_idx(Vector3D coord, long resolutionx, long resolutiony, long resolutionz):
     cdef unsigned long idx
-    idx = resolution * resolution * coord.x + resolution * coord.y + coord.z
+
+    idx = resolutionz * resolutiony * coord.x + resolutionz * coord.y + coord.z
+    #print(resolutionx, resolutiony, resolutionz, idx)
     return idx
 
 
@@ -34,29 +36,37 @@ cdef class MISE:
     cdef vector[Voxel] voxels
     cdef vector[GridPoint] grid_points
     cdef map[long, long] grid_point_hash
-    cdef readonly int resolution_0
+    cdef readonly int resolution_0x
+    cdef readonly int resolution_0y
+    cdef readonly int resolution_0z
     cdef readonly int depth
     cdef readonly double threshold
     cdef readonly int voxel_size_0
-    cdef readonly int resolution
+    cdef readonly int resolution_x
+    cdef readonly int resolution_y
+    cdef readonly int resolution_z
 
-    def __cinit__(self, int resolution_0, int depth, double threshold):
-        self.resolution_0 = resolution_0
+    def __cinit__(self, int resolution_0x, int resolution_0y, int resolution_0z, int depth, double threshold):
+        self.resolution_0x = resolution_0x
+        self.resolution_0y = resolution_0y
+        self.resolution_0z = resolution_0z
         self.depth = depth
         self.threshold = threshold
         self.voxel_size_0 = (1 << depth)
-        self.resolution = resolution_0 * self.voxel_size_0
+        self.resolution_x = resolution_0x * self.voxel_size_0
+        self.resolution_y = resolution_0y * self.voxel_size_0
+        self.resolution_z = resolution_0z * self.voxel_size_0
 
         # Create initial voxels
-        self.voxels.reserve(resolution_0 * resolution_0 * resolution_0)
+        self.voxels.reserve(resolution_0x * resolution_0y * resolution_0z)
         
         cdef Voxel voxel
         cdef GridPoint point
         cdef Vector3D loc
         cdef int i, j, k
-        for i in range(resolution_0):
-            for j in range(resolution_0): 
-                for  k in range (resolution_0):
+        for i in range(resolution_0x):
+            for j in range(resolution_0y):
+                for  k in range(resolution_0z):
                     loc = Vector3D(
                         i * self.voxel_size_0, 
                         j * self.voxel_size_0,
@@ -68,20 +78,20 @@ cdef class MISE:
                         is_leaf=True,
                     )
 
-                    assert(self.voxels.size() == vec_to_idx(Vector3D(i, j, k), resolution_0))
+                    #assert(self.voxels.size() == vec_to_idx(Vector3D(i, j, k), resolution_0))
                     self.voxels.push_back(voxel)
 
         # Create initial grid points
-        self.grid_points.reserve((resolution_0 + 1) * (resolution_0 + 1) * (resolution_0 + 1))
-        for i in range(resolution_0 + 1):
-            for j in range(resolution_0 + 1):
-                for k in range(resolution_0 + 1):
+        self.grid_points.reserve((resolution_0x + 1) * (resolution_0y + 1) * (resolution_0z + 1))
+        for i in range(resolution_0x + 1):
+            for j in range(resolution_0y + 1):
+                for k in range(resolution_0z + 1):
                     loc = Vector3D(
                         i * self.voxel_size_0, 
                         j * self.voxel_size_0,
                         k * self.voxel_size_0,
                     )
-                    assert(self.grid_points.size() == vec_to_idx(Vector3D(i, j, k), resolution_0 + 1))
+                    assert(self.grid_points.size() == vec_to_idx(Vector3D(i, j, k), resolution_0x + 1, resolution_0y + 1, resolution_0z + 1))
                     self.add_grid_point(loc)
 
     def update(self, long[:, :] points, double[:] values):
@@ -129,7 +139,7 @@ cdef class MISE:
 
     def to_dense(self):
         """Output dense matrix at highest resolution."""
-        out_array = np.full((self.resolution + 1,) * 3, np.nan)
+        out_array = np.full((self.resolution_x + 1, self.resolution_y + 1,self.resolution_z + 1), np.nan)
         cdef double[:, :, :] out_view = out_array
         cdef GridPoint point
         cdef int i, j, k
@@ -140,24 +150,24 @@ cdef class MISE:
             out_view[point.loc.x, point.loc.y, point.loc.z] = point.value
 
         # Complete along x axis
-        for i in range(1, self.resolution + 1):
-            for j in range(self.resolution + 1):
-                for k in range(self.resolution + 1):
+        for i in range(1, self.resolution_x + 1):
+            for j in range(self.resolution_y + 1):
+                for k in range(self.resolution_z + 1):
                     if isnan(out_view[i, j, k]):
                         out_view[i, j, k] = out_view[i-1, j, k]
 
         # Complete along y axis
-        for i in range(self.resolution + 1):
-            for j in range(1, self.resolution + 1):
-                for k in range(self.resolution + 1):
+        for i in range(self.resolution_x + 1):
+            for j in range(1, self.resolution_y + 1):
+                for k in range(self.resolution_z + 1):
                     if isnan(out_view[i, j, k]):
                         out_view[i, j, k] = out_view[i, j-1, k]
 
 
         # Complete along z axis
-        for i in range(self.resolution + 1):
-            for j in range(self.resolution + 1):
-                for k in range(1, self.resolution + 1):
+        for i in range(self.resolution_x + 1):
+            for j in range(self.resolution_y + 1):
+                for k in range(1, self.resolution_z + 1):
                     if isnan(out_view[i, j, k]):
                         out_view[i, j, k] = out_view[i, j, k-1]
                     assert(not isnan(out_view[i, j, k]))
@@ -284,13 +294,18 @@ cdef class MISE:
     cdef long get_voxel_idx(self, Vector3D loc) except +:
         """Utility function for getting voxel index corresponding to 3D coordinates."""
         # Shorthands
-        cdef long resolution = self.resolution
-        cdef long resolution_0 = self.resolution_0
+        cdef long resolution_x = self.resolution_x
+        cdef long resolution_y = self.resolution_y
+        cdef long resolution_z = self.resolution_z
+
+        cdef long resolution_0x = self.resolution_0x
+        cdef long resolution_0y = self.resolution_0y
+        cdef long resolution_0z = self.resolution_0z
         cdef long depth = self.depth
         cdef long voxel_size_0 = self.voxel_size_0
 
         # Return -1 if point lies outside bounds
-        if not (0 <= loc.x < resolution and 0<= loc.y < resolution and 0 <= loc.z < resolution):
+        if not (0 <= loc.x < resolution_x and 0<= loc.y < resolution_y and 0 <= loc.z < resolution_z):
             return -1
         
         # Coordinates in coarse voxel grid
@@ -301,7 +316,7 @@ cdef class MISE:
         )       
 
         # Initial voxels
-        cdef int idx = vec_to_idx(loc0, resolution_0)
+        cdef int idx = vec_to_idx(loc0, resolution_0x, resolution_0y, resolution_0z)
         cdef Voxel voxel = self.voxels[idx]
         assert(voxel.loc.x == loc0.x * voxel_size_0)
         assert(voxel.loc.y == loc0.y * voxel_size_0)
@@ -353,11 +368,11 @@ cdef class MISE:
             value=0.,
             known=False,
         )
-        self.grid_point_hash[vec_to_idx(loc, self.resolution + 1)] = self.grid_points.size()
+        self.grid_point_hash[vec_to_idx(loc, self.resolution_x + 1, self.resolution_y + 1, self.resolution_z + 1)] = self.grid_points.size()
         self.grid_points.push_back(point)
 
     cdef inline int get_grid_point_idx(self, Vector3D loc):
-        p_idx = self.grid_point_hash.find(vec_to_idx(loc, self.resolution + 1))
+        p_idx = self.grid_point_hash.find(vec_to_idx(loc, self.resolution_x + 1, self.resolution_y + 1, self.resolution_z + 1))
         if p_idx == self.grid_point_hash.end():
             return -1
 

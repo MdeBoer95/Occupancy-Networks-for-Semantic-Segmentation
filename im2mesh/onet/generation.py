@@ -33,7 +33,7 @@ class Generator3D(object):
 
     def __init__(self, model, points_batch_size=100000,
                  threshold=0.5, refinement_step=0, device=None,
-                 resolution0=32, upsampling_steps=3,
+                 resolution0=[40, 28, 32], upsampling_steps=4,
                  with_normals=False, padding=0.1, sample=False,
                  simplify_nfaces=None,
                  preprocessor=None):
@@ -94,7 +94,7 @@ class Generator3D(object):
             c (tensor): latent conditioned code c
             stats_dict (dict): stats dictionary
         '''
-        threshold = np.log(self.threshold) - np.log(1. - self.threshold)
+
         t0 = time.time()
         # Compute bounding box size
         box_size = 1 + self.padding
@@ -109,7 +109,7 @@ class Generator3D(object):
             value_grid = values.reshape(nx, nx, nx)
         else:
             mesh_extractor = MISE(
-                self.resolution0, self.upsampling_steps, threshold)
+                self.resolution0[0], self.resolution0[1], self.resolution0[2], self.upsampling_steps, self.threshold)
 
             points = mesh_extractor.query()
 
@@ -117,8 +117,8 @@ class Generator3D(object):
                 # Query points
                 pointsf = torch.FloatTensor(points).to(self.device)
                 # Normalize to bounding box
-                pointsf = pointsf / mesh_extractor.resolution
-                pointsf = box_size * (pointsf - 0.5)
+                #pointsf = pointsf / mesh_extractor.resolution
+                #pointsf = box_size * (pointsf - 0.5)
                 # Evaluate model and update
                 values = self.eval_points(
                     pointsf, z, c, **kwargs).cpu().numpy()
@@ -130,7 +130,6 @@ class Generator3D(object):
 
         # Extract mesh
         stats_dict['time (eval points)'] = time.time() - t0
-
         mesh = self.extract_mesh(value_grid, z, c, stats_dict=stats_dict)
         return mesh, value_grid
 
@@ -148,7 +147,7 @@ class Generator3D(object):
         for pi in p_split:
             pi = pi.unsqueeze(0).to(self.device)
             with torch.no_grad():
-                occ_hat = self.model.decode(pi, z, c, **kwargs).logits
+                occ_hat = self.model.decode(pi, z, c, **kwargs).probs
 
             occ_hats.append(occ_hat.squeeze(0).detach().cpu())
 

@@ -3,7 +3,7 @@ from mise import MISE
 import time
 
 t0 = time.time()
-extractor = MISE(1, 2, 0.)
+extractor = MISE(1, 1, 1, 1, 0.5)
 
 p = extractor.query()
 i = 0
@@ -19,7 +19,7 @@ while p.shape[0] != 0:
         break
 
 print(extractor.to_dense())
-# p, v = extractor.get_points()
-# print(p)
-# print(v)
+p, v = extractor.get_points()
+#print(p)
+#print(v)
 print('Total time: %f' % (time.time() - t0))
