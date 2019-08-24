@@ -147,8 +147,6 @@ class CTImages_Preprocessor(object):
         """
         offsets_and_labels = []
         # x and y are fixed to 620, 420. Remember y, because offset y is inverted
-        y_max = 420
-
         # Padding changes from (620, 420, z) to (640, 448, 512):
         x_pad = 10
         y_pad = 14
@@ -161,7 +159,6 @@ class CTImages_Preprocessor(object):
             end = z_diff + z
 
             # List for labels that will be removed
-            # remove = []
             for label in label_list:
 
                 # Voxelspacing for z_dim
@@ -175,7 +172,7 @@ class CTImages_Preprocessor(object):
                 # If label is completely inside the cropped image
                 if z_offset > begin and (z_offset + label[0].shape[2]) < end:
                     # Offset change:
-                    offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset + z_diff]
+                    offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset - z_diff]
                     offsets_and_labels.append([offset, label[0]])
         # Else: Label will be discarded
         # z will be padded from both sides
