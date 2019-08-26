@@ -10,6 +10,8 @@ from im2mesh.utils import visualize as vis
 from im2mesh.training import BaseTrainer
 from im2mesh.onet.generation import Generator3D
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class Trainer(BaseTrainer):
     ''' Trainer object for the Occupancy Network.
@@ -169,8 +171,40 @@ class Trainer(BaseTrainer):
             occ_pred[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]]
         # remove padding from label
         label = data.get('padded_label')[1].numpy()[:shape[0], :shape[1], :shape[2]]
+        print(np.count)
         assert(label.shape == occ_pred_label.shape)
         smooth = 1e-6
+
+        X_pred = []
+        Y_pred = []
+        Z_pred = []
+        X_lab = []
+        Y_lab = []
+        Z_lab = []
+        for x in range(occ_pred_label.shape[0]):
+            for y in range(occ_pred_label.shape[1]):
+                for z in range(occ_pred_label.shape[2]):
+                    if occ_pred_label[x, y, z] == 1:
+                        X_pred.append(int(x))
+                        Y_pred.append(int(y))
+                        Z_pred.append(int(z))
+                    if label[x,y,z] == 1:
+                        X_lab.append(int(x))
+                        X_lab.append(int(y))
+                        X_lab.append(int(z))
+        plt.interactive(False)
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 2, 1, projection='3d')
+        ax.scatter(np.array(X_pred), np.array(Y_pred), np.array(Z_pred))
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax = fig.add_subplot(1, 2, 2, projection='3d')
+        ax.scatter(np.array(X_lab), np.array(Y_lab), np.array(Z_lab))
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        plt.show()
         eval_dict['iou'] = ((label & occ_pred_label).sum() + smooth) / ((label | occ_pred_label).sum() + smooth)
 
 
