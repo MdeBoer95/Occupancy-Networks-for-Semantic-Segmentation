@@ -10,8 +10,6 @@ from im2mesh.utils import visualize as vis
 from im2mesh.training import BaseTrainer
 from im2mesh.onet.generation import Generator3D
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 class Trainer(BaseTrainer):
     ''' Trainer object for the Occupancy Network.
@@ -35,11 +33,12 @@ class Trainer(BaseTrainer):
         self.input_type = input_type
         self.vis_dir = vis_dir
         self.threshold = threshold
+        print("Threshold: ", threshold)
         self.eval_sample = eval_sample
-
+        '''
         if vis_dir is not None and not os.path.exists(vis_dir):
             os.makedirs(vis_dir)
-
+        '''
     def train_step(self, data):
         ''' Performs a training step.
 
@@ -119,8 +118,6 @@ class Trainer(BaseTrainer):
             eval_dict['iou_voxels'] = iou_voxels
 
         return eval_dict'''
-
-
         # Our Code
         device = self.device
         generator = Generator3D(self.model, device=device)
@@ -129,22 +126,16 @@ class Trainer(BaseTrainer):
         threshold = self.threshold
         eval_dict = {}
 
-        # Compute elbo
-
-        # Only sampled points evaluation:
+        # Sampled points evaluation:
         with torch.no_grad():
             points = data.get('points').to(device)
             occ = data.get('points.occ').to(device)
-
             inputs = data.get('inputs', torch.empty(points.size(0), 0)).to(device)
-
             kwargs = {}
-
-
             p_out = self.model(points, inputs,
                                sample=self.eval_sample, **kwargs)
-            probs = p_out.probs
-            occ_pred = (probs >= threshold).float()
+            probabilities = p_out.probs
+            occ_pred = (probabilities >= threshold).float()
             acc = (occ_pred == occ).sum().float() / occ.numel()
             acc = acc.cpu().numpy()
             metrics = self.confusion(occ, occ_pred)
@@ -156,14 +147,40 @@ class Trainer(BaseTrainer):
             eval_dict['precision'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fp'])
             eval_dict['recall'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fn'])
 
-
-        # Value grid
+        # Value grid evaluation:
+        # generates mesh from 2nd sample in dataloader
         mesh, stats, occ_grid = generator.generate_mesh(data)
 
-        # calculate IoU
+        # calculate simple IoU:
+        def label_iou(guessed_label, ground_truth_label, s):
+            """
+            Function to calculate simple IoU between a label and a prediction, cut down to the label
+            :param guessed_label: predicted value grid, cropped to label shape at label position
+            :param ground_truth_label: Bit volume
+            :param s: smoothing factor to prevent division by 0
+            :return: simple IoU between guessed_grid and ground_truth_label, cropped to label
+            """
+            intersection = (ground_truth_label & guessed_label).sum() + s
+            union = (ground_truth_label | guessed_label).sum() + s
+
+            return intersection / union
+
+        def overall_iou(guessed_grid, guessed_label, ground_truth_label, s):
+            """
+            Function to calculate simple IoU between label and prediction
+            :param guessed_grid: predicted value grid
+            :param ground_truth_label: Bit volume
+            :param guessed_label: predicted value grid, cropped to label shape at label position
+            :param s: smoothing factor to prevent division by 0
+            :return: simple IoU between guessed grid and ground truth
+            """
+            intersection = (ground_truth_label & guessed_label).sum() + s
+            union = (ground_truth_label | guessed_label).sum() + (guessed_grid.sum() - guessed_label.sum()) + s
+            return intersection / union
 
         # remove padding from grid
         occ_pred = (occ_grid >= threshold).astype(int)[:640, :448, :512]
+        # Get label data
         offset = data.get('label_offset')[1].numpy().astype(int)
         shape = data.get('label_shape')[1].numpy()
         # get the part from occ_grid where the label should be
@@ -171,45 +188,64 @@ class Trainer(BaseTrainer):
             occ_pred[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]]
         # remove padding from label
         label = data.get('padded_label')[1].numpy()[:shape[0], :shape[1], :shape[2]]
-        print(np.count)
-        assert(label.shape == occ_pred_label.shape)
         smooth = 1e-6
 
+        eval_dict['iou_label'] = label_iou(occ_pred_label, label, smooth)
+        eval_dict['iou_complete'] = overall_iou(occ_pred, occ_pred_label, label, smooth)
+        '''
+        print('Started label')
+        #label_truth = np.zeros((640, 448, 512))
+        #label_truth[offset[0]:offset[0]+shape[0], offset[1]:offset[1]+shape[1], offset[2]:offset[2]+shape[2]] = label
         X_pred = []
         Y_pred = []
         Z_pred = []
         X_lab = []
         Y_lab = []
         Z_lab = []
+        print('Started for loops')
         for x in range(occ_pred_label.shape[0]):
+            print('X: ', x)
             for y in range(occ_pred_label.shape[1]):
+                print('Y: ',y)
                 for z in range(occ_pred_label.shape[2]):
                     if occ_pred_label[x, y, z] == 1:
                         X_pred.append(int(x))
                         Y_pred.append(int(y))
                         Z_pred.append(int(z))
-                    if label[x,y,z] == 1:
+                    if label[x, y, z] == 1:
                         X_lab.append(int(x))
-                        X_lab.append(int(y))
-                        X_lab.append(int(z))
-        plt.interactive(False)
+                        Y_lab.append(int(y))
+                        Z_lab.append(int(z))
+        #plt.interactive(False)
+        
+        print('For loop done. Started scattering')
+
         fig = plt.figure()
         ax = fig.add_subplot(1, 2, 1, projection='3d')
-        ax.scatter(np.array(X_pred), np.array(Y_pred), np.array(Z_pred))
+        ax.scatter(np.array(X_pred), np.array(Y_pred), np.array(Z_pred), marker=',', alpha=0.5)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
-        ax = fig.add_subplot(1, 2, 2, projection='3d')
-        ax.scatter(np.array(X_lab), np.array(Y_lab), np.array(Z_lab))
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        plt.show()
-        eval_dict['iou'] = ((label & occ_pred_label).sum() + smooth) / ((label | occ_pred_label).sum() + smooth)
+        ax.set_xlim(0, occ_pred_label.shape[0])
+        ax.set_ylim(0, occ_pred_label.shape[1])
+        ax.set_zlim(0, occ_pred_label.shape[2])
 
-
-
-
+        ax1 = fig.add_subplot(1, 2, 2, projection='3d')
+        ax1.scatter(np.array(X_lab), np.array(Y_lab), np.array(Z_lab),  marker=',', alpha=0.5)
+        ax1.set_xlabel('X')
+        ax1.set_ylabel('Y')
+        ax1.set_zlabel('Z')
+        ax1.set_xlim(0, occ_pred_label.shape[0])
+        ax1.set_ylim(0, occ_pred_label.shape[1])
+        ax1.set_zlim(0, occ_pred_label.shape[2])
+        print('Done scattering')
+        # rotate the axes and update
+        for angle in range(0, 360, 60):
+            ax.view_init(30, angle)
+            ax1.view_init(30, angle)
+            plt.draw()
+            plt.savefig('img_sanity_check2_'+str(angle))
+        '''
         '''
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?

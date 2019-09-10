@@ -100,7 +100,7 @@ class Generator3D(object):
         box_size = 1 + self.padding
 
         # Shortcut
-        if self.upsampling_steps == 0:
+        if self.upsampling_steps == -1:
             nx = self.resolution0
             pointsf = box_size * make_3d_grid(
                 (0,)*3, (32,)*3, (nx,)*3

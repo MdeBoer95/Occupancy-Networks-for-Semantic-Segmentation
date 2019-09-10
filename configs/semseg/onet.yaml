@@ -2,7 +2,7 @@ method: onet
 data:
   input_type: voxels
   dim: 3
-  points_subsample: 1024
+  points_subsample: 2048
 model:
   encoder_latent: null
   decoder: cbatchnorm
@@ -11,11 +11,11 @@ model:
   z_dim: 0
 training:
   out_dir:  out/semseg/onet
-  batch_size: 16
-  model_selection_metric: points_accuracy
+  batch_size: 64
+  model_selection_metric: iou_complete
   model_selection_mode: maximize
 test:
-  threshold: 0.2
+  threshold: 0.5
   eval_mesh: true
   eval_pointcloud: false
 generation:
