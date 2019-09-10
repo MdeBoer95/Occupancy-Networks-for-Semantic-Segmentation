@@ -119,10 +119,10 @@ class Trainer(BaseTrainer):
 
         return eval_dict'''
         # Our Code
+
         device = self.device
         generator = Generator3D(self.model, device=device)
         self.model.eval()
-
         threshold = self.threshold
         eval_dict = {}
 
@@ -148,6 +148,7 @@ class Trainer(BaseTrainer):
             eval_dict['recall'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fn'])
 
         # Value grid evaluation:
+
         # generates mesh from 2nd sample in dataloader
         mesh, stats, occ_grid = generator.generate_mesh(data)
 
@@ -192,6 +193,8 @@ class Trainer(BaseTrainer):
 
         eval_dict['iou_label'] = label_iou(occ_pred_label, label, smooth)
         eval_dict['iou_complete'] = overall_iou(occ_pred, occ_pred_label, label, smooth)
+
+        # Visualization, set debug point at return
         '''
         print('Started label')
         #label_truth = np.zeros((640, 448, 512))
@@ -254,27 +257,9 @@ class Trainer(BaseTrainer):
         occ_grid[occ_grid_idx] = 1
         print(np.count_nonzero(occ_grid_pred))
         '''
-        # Estimate voxel iou
-        '''voxels_occ = 1 #None
-        if voxels_occ is not None:
-            #voxels_occ = voxels_occ.to(device)
-            points_voxels = make_3d_grid(
-                (-0.5 + 1/64,) * 3, (0.5 - 1/64,) * 3, (32,) * 3)
-            points_voxels = points_voxels.expand(
-                points.size(0), *points_voxels.size())
-            points_voxels = points_voxels.to(device)
-            with torch.no_grad():
-                p_out = self.model(points_voxels, inputs,
-                                   sample=self.eval_sample, **kwargs)
-
-            voxels_occ_np = (voxels_occ >= 0.5).cpu().numpy()
-            occ_hat_np = (p_out.probs >= threshold).cpu().numpy()
-            iou_voxels = compute_iou(voxels_occ_np, occ_hat_np).mean()
-
-            eval_dict['iou_voxels'] = iou_voxels'''
 
         return eval_dict
-
+    '''
     def visualize(self, data):
         ''' Performs a visualization step for the data.
 
@@ -303,6 +288,7 @@ class Trainer(BaseTrainer):
                 inputs[i].cpu(), self.input_type, input_img_path)
             vis.visualize_voxels(
                 voxels_out[i], os.path.join(self.vis_dir, '%03d.png' % i))
+    '''
 
     def compute_loss(self, data):
         ''' Computes the loss.
