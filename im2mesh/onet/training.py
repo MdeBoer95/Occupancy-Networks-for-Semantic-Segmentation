@@ -261,11 +261,11 @@ class Trainer(BaseTrainer):
         return eval_dict
     '''
     def visualize(self, data):
-        ''' Performs a visualization step for the data.
+         Performs a visualization step for the data.
 
         Args:
             data (dict): data dictionary
-        '''
+        
         device = self.device
 
         batch_size = data['points'].size(0)

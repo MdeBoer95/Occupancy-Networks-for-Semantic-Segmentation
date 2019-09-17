@@ -4,7 +4,7 @@ import pandas as pd
 
 # Keys in logfile: iteration, points_accuracy, tp, fp, tn, fn, precision, recall
 
-log_file = "/visinf/projects_students/VCLabOccNet/Occupancy-Networks-for-Semantic-Segmentation/metric_log"
+log_file = "metric_log"
 pd_stats = pd.read_csv(log_file)
 print(pd_stats)
 epoch_acc_plotpoints = pd_stats[['iteration', 'points_accuracy']].to_numpy()
