@@ -107,5 +107,5 @@ setup(
     ext_modules=cythonize(ext_modules),
     cmdclass={
         'build_ext': BuildExtension
-    }
+    }, install_requires=['numpy', 'torchvision', 'torch', 'medpy']
 )

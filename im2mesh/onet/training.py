@@ -11,8 +11,36 @@ from im2mesh.training import BaseTrainer
 from im2mesh.onet.generation import Generator3D
 import numpy as np
 
+
+def confusion(prediction, truth):
+    """ Returns the confusion matrix for the values in the `prediction` and `truth`
+    tensors, i.e. the amount of positions where the values of `prediction`
+    and `truth` are
+    - 1 and 1 (True Positive)
+    - 1 and 0 (False Positive)
+    - 0 and 0 (True Negative)
+    - 0 and 1 (False Negative)
+    """
+
+    confusion_vector = prediction / truth
+    # Element-wise division of the 2 tensors returns a new tensor which holds a
+    # unique value for each case:
+    #   1     where prediction and truth are 1 (True Positive)
+    #   inf   where prediction is 1 and truth is 0 (False Positive)
+    #   nan   where prediction and truth are 0 (True Negative)
+    #   0     where prediction is 0 and truth is 1 (False Negative)
+
+    true_positives = torch.sum(confusion_vector == 1).item()
+    false_positives = torch.sum(confusion_vector == float('inf')).item()
+    true_negatives = torch.sum(torch.isnan(confusion_vector)).item()
+    false_negatives = torch.sum(confusion_vector == 0).item()
+
+    acc = (true_positives + true_negatives) / (true_positives + false_positives + false_negatives + true_negatives)
+    return true_positives, false_positives, true_negatives, false_negatives, acc
+
+
 class Trainer(BaseTrainer):
-    ''' Trainer object for the Occupancy Network.
+    """ Trainer object for the Occupancy Network.
 
     Args:
         model (nn.Module): Occupancy Network model
@@ -23,7 +51,7 @@ class Trainer(BaseTrainer):
         threshold (float): threshold value
         eval_sample (bool): whether to evaluate samples
 
-    '''
+    """
 
     def __init__(self, model, optimizer, device=None, input_type='img',
                  vis_dir=None, threshold=0.5, eval_sample=False):
@@ -39,12 +67,13 @@ class Trainer(BaseTrainer):
         if vis_dir is not None and not os.path.exists(vis_dir):
             os.makedirs(vis_dir)
         '''
+
     def train_step(self, data):
-        ''' Performs a training step.
+        """ Performs a training step.
 
         Args:
             data (dict): data dictionary
-        '''
+        """
         self.model.train()
         self.optimizer.zero_grad()
         loss = self.compute_loss(data)
@@ -54,11 +83,11 @@ class Trainer(BaseTrainer):
         return loss.item()
 
     def eval_step(self, data):
-        ''' Performs an evaluation step.
+        """ Performs an evaluation step.
 
         Args:
             data (dict): data dictionary
-        '''
+        """
         # Original Code
         '''
         self.model.eval()
@@ -128,6 +157,7 @@ class Trainer(BaseTrainer):
 
         # Sampled points evaluation:
         with torch.no_grad():
+            smooth = 1e-6
             points = data.get('points').to(device)
             occ = data.get('points.occ').to(device)
             inputs = data.get('inputs', torch.empty(points.size(0), 0)).to(device)
@@ -138,14 +168,14 @@ class Trainer(BaseTrainer):
             occ_pred = (probabilities >= threshold).float()
             acc = (occ_pred == occ).sum().float() / occ.numel()
             acc = acc.cpu().numpy()
-            metrics = self.confusion(occ, occ_pred)
+            metrics = confusion(occ, occ_pred)
             eval_dict['points_accuracy'] = acc
             eval_dict['tp'] = np.array(metrics[0])
             eval_dict['fp'] = np.array(metrics[1])
             eval_dict['tn'] = np.array(metrics[2])
             eval_dict['fn'] = np.array(metrics[3])
-            eval_dict['precision'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fp'])
-            eval_dict['recall'] = eval_dict['tp'] / (eval_dict['tp'] + eval_dict['fn'])
+            eval_dict['precision'] = (eval_dict['tp'] + smooth) / ((eval_dict['tp'] + eval_dict['fp']) + smooth)
+            eval_dict['recall'] = (eval_dict['tp'] + smooth) / ((eval_dict['tp'] + eval_dict['fn']) + smooth)
 
         # Value grid evaluation:
 
@@ -189,7 +219,6 @@ class Trainer(BaseTrainer):
             occ_pred[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]]
         # remove padding from label
         label = data.get('padded_label')[1].numpy()[:shape[0], :shape[1], :shape[2]]
-        smooth = 1e-6
 
         eval_dict['iou_label'] = label_iou(occ_pred_label, label, smooth)
         eval_dict['iou_complete'] = overall_iou(occ_pred, occ_pred_label, label, smooth)
@@ -259,20 +288,21 @@ class Trainer(BaseTrainer):
         '''
 
         return eval_dict
-    '''
+
     def visualize(self, data):
+        """
          Performs a visualization step for the data.
 
         Args:
             data (dict): data dictionary
-        
+        """
         device = self.device
 
         batch_size = data['points'].size(0)
         inputs = data.get('inputs', torch.empty(batch_size, 0)).to(device)
 
         shape = (32, 32, 32)
-        p = make_3d_grid([-0.5] * 3, [0.5] * 3, shape).to(device)
+        p = make_3d_grid((-0.5,) * 3, (0.5,) * 3, shape).to(device)
         p = p.expand(batch_size, *p.size())
 
         kwargs = {}
@@ -288,14 +318,16 @@ class Trainer(BaseTrainer):
                 inputs[i].cpu(), self.input_type, input_img_path)
             vis.visualize_voxels(
                 voxels_out[i], os.path.join(self.vis_dir, '%03d.png' % i))
-    '''
 
     def compute_loss(self, data):
-        ''' Computes the loss.
+        """ Computes the loss.
 
         Args:
             data (dict): data dictionary
-        '''
+            :param data:
+            :param self:
+        """
+
         device = self.device
         p = data.get('points').to(device)
         occ = data.get('points.occ').to(device)
@@ -318,29 +350,3 @@ class Trainer(BaseTrainer):
         loss = loss + loss_i.sum(-1).mean()
 
         return loss
-
-    def confusion(self, prediction, truth):
-        """ Returns the confusion matrix for the values in the `prediction` and `truth`
-        tensors, i.e. the amount of positions where the values of `prediction`
-        and `truth` are
-        - 1 and 1 (True Positive)
-        - 1 and 0 (False Positive)
-        - 0 and 0 (True Negative)
-        - 0 and 1 (False Negative)
-        """
-
-        confusion_vector = prediction / truth
-        # Element-wise division of the 2 tensors returns a new tensor which holds a
-        # unique value for each case:
-        #   1     where prediction and truth are 1 (True Positive)
-        #   inf   where prediction is 1 and truth is 0 (False Positive)
-        #   nan   where prediction and truth are 0 (True Negative)
-        #   0     where prediction is 0 and truth is 1 (False Negative)
-
-        true_positives = torch.sum(confusion_vector == 1).item()
-        false_positives = torch.sum(confusion_vector == float('inf')).item()
-        true_negatives = torch.sum(torch.isnan(confusion_vector)).item()
-        false_negatives = torch.sum(confusion_vector == 0).item()
-
-        acc = (true_positives + true_negatives) / (true_positives + false_positives + false_negatives + true_negatives)
-        return true_positives, false_positives, true_negatives, false_negatives, acc

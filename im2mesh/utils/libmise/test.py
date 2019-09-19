@@ -3,7 +3,7 @@ from mise import MISE
 import time
 
 t0 = time.time()
-extractor = MISE(1, 1, 1, 1, 0.5)
+extractor = MISE(640, 448, 512, 0, 0.5)
 
 p = extractor.query()
 i = 0
