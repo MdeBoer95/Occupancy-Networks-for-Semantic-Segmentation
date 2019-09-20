@@ -10,6 +10,7 @@ from im2mesh.utils import visualize as vis
 from im2mesh.training import BaseTrainer
 from im2mesh.onet.generation import Generator3D
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def confusion(prediction, truth):
@@ -224,10 +225,11 @@ class Trainer(BaseTrainer):
         eval_dict['iou_complete'] = overall_iou(occ_pred, occ_pred_label, label, smooth)
 
         # Visualization, set debug point at return
-        '''
+
         print('Started label')
-        #label_truth = np.zeros((640, 448, 512))
-        #label_truth[offset[0]:offset[0]+shape[0], offset[1]:offset[1]+shape[1], offset[2]:offset[2]+shape[2]] = label
+        label_truth = np.zeros((640, 448, 512))
+        label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1],
+        offset[2]:offset[2] + shape[2]] = label
         X_pred = []
         Y_pred = []
         Z_pred = []
@@ -238,7 +240,7 @@ class Trainer(BaseTrainer):
         for x in range(occ_pred_label.shape[0]):
             print('X: ', x)
             for y in range(occ_pred_label.shape[1]):
-                print('Y: ',y)
+                print('Y: ', y)
                 for z in range(occ_pred_label.shape[2]):
                     if occ_pred_label[x, y, z] == 1:
                         X_pred.append(int(x))
@@ -248,8 +250,8 @@ class Trainer(BaseTrainer):
                         X_lab.append(int(x))
                         Y_lab.append(int(y))
                         Z_lab.append(int(z))
-        #plt.interactive(False)
-        
+        # plt.interactive(False)
+
         print('For loop done. Started scattering')
 
         fig = plt.figure()
@@ -263,7 +265,7 @@ class Trainer(BaseTrainer):
         ax.set_zlim(0, occ_pred_label.shape[2])
 
         ax1 = fig.add_subplot(1, 2, 2, projection='3d')
-        ax1.scatter(np.array(X_lab), np.array(Y_lab), np.array(Z_lab),  marker=',', alpha=0.5)
+        ax1.scatter(np.array(X_lab), np.array(Y_lab), np.array(Z_lab), marker=',', alpha=0.5)
         ax1.set_xlabel('X')
         ax1.set_ylabel('Y')
         ax1.set_zlabel('Z')
@@ -276,8 +278,10 @@ class Trainer(BaseTrainer):
             ax.view_init(30, angle)
             ax1.view_init(30, angle)
             plt.draw()
-            plt.savefig('img_sanity_check2_'+str(angle))
-        '''
+            plt.savefig('img_without_mise' + str(angle))
+
+        exit()
+
         '''
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?

@@ -33,7 +33,7 @@ class Generator3D(object):
 
     def __init__(self, model, points_batch_size=100000,
                  threshold=0.5, refinement_step=0, device=None,
-                 resolution0=[40, 28, 32], upsampling_steps=4,
+                 resolution0=[640, 448, 512], upsampling_steps=0,
                  with_normals=False, padding=0.1, sample=False,
                  simplify_nfaces=None,
                  preprocessor=None):
