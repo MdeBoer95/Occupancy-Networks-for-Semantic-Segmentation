@@ -237,11 +237,11 @@ class Trainer(BaseTrainer):
         Y_lab = []
         Z_lab = []
         print('Started for loops')
-        for x in range(occ_pred_label.shape[0]):
-            print('X: ', x)
-            for y in range(occ_pred_label.shape[1]):
-                print('Y: ', y)
-                for z in range(occ_pred_label.shape[2]):
+        for x in range(occ_pred.shape[0]):
+            #print('X: ', x)
+            for y in range(occ_pred.shape[1]):
+                #print('Y: ', y)
+                for z in range(occ_pred.shape[2]):
                     if occ_pred_label[x, y, z] == 1:
                         X_pred.append(int(x))
                         Y_pred.append(int(y))
@@ -278,7 +278,7 @@ class Trainer(BaseTrainer):
             ax.view_init(30, angle)
             ax1.view_init(30, angle)
             plt.draw()
-            plt.savefig('img_without_mise' + str(angle))
+            plt.savefig('img_with_mise_whole' + str(angle))
 
         exit()
 
