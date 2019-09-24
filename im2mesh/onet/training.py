@@ -242,11 +242,11 @@ class Trainer(BaseTrainer):
             for y in range(occ_pred.shape[1]):
                 #print('Y: ', y)
                 for z in range(occ_pred.shape[2]):
-                    if occ_pred_label[x, y, z] == 1:
+                    if occ_pred[x, y, z] == 1:
                         X_pred.append(int(x))
                         Y_pred.append(int(y))
                         Z_pred.append(int(z))
-                    if label[x, y, z] == 1:
+                    if label_truth[x, y, z] == 1:
                         X_lab.append(int(x))
                         Y_lab.append(int(y))
                         Z_lab.append(int(z))
