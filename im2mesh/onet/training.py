@@ -225,7 +225,7 @@ class Trainer(BaseTrainer):
         eval_dict['iou_complete'] = overall_iou(occ_pred, occ_pred_label, label, smooth)
 
         # Visualization, set debug point at return
-
+        '''
         print('Started label')
         label_truth = np.zeros((640, 448, 512))
         label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1],
@@ -281,7 +281,7 @@ class Trainer(BaseTrainer):
             plt.savefig('img_with_mise_whole' + str(angle))
 
         exit()
-
+        '''
         '''
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?
