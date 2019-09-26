@@ -46,54 +46,98 @@ class CTImagesDataset(Dataset):
             assert (np.array_equal(boundingbox, pad[:shape[0], :shape[1], :shape[2]]))
             return pad, shape
 
-        def sample_points(list_points, list_occ, sample_number, share_occ):
+        def sample_points(list_points, list_occ, sample_number, share_occ, label, offset, surface=False):
             """
-            Sample points from the file
+            Sample points from the file and ensure that a determined share of the points is occupied
+            :param label:
+            :param surface: flag if surface sampling should be used
             :param share_occ: share of points that will be occupied
             :param sample_number: number of points that will be sampled
             :param list_points: list of points
-            :param list_occ: list of occupied values
+            :param list_occ: list of occupancy values
+            :param offset: offset of label
             :return: tuple of sublist of list_points and list_occ
             """
-            assert(len(list_occ) == len(list_points))
+
+            def surface_points(bounding_box, n):
+                """
+                Get points near the surface (in the space around each surface point) of a given label
+                :param n: determines the size of the space (1 means 3³ with surface point in the center)
+                :param bounding_box: bit array, 1 indicating weapon
+                :return: list of points near the surface
+                """
+
+                def area(r):
+                    """
+                    :param r: length of space around center
+                    :return: list of points, area(1) produces points from [-1,-1,-1] to [1,1,1]
+                    """
+                    r = range(-r, (r + 1))
+                    return [[k, l, m] for k in r for l in r for m in r]
+
+                # bounding box is limit
+                allowed = [range(bounding_box.shape[0]), range(bounding_box.shape[1]), range(bounding_box.shape[2])]
+
+                occupied = np.where(bounding_box == 1)
+                surface_area = []
+                for point in occupied:
+                    values = []
+                    point_area = []
+                    for space in area(n):
+                        check = point + space
+                        if check[0] in allowed[0] and check[1] in allowed[1] and check[2] in allowed[2]:
+                            point_area.append(check)
+                            values.append(bounding_box[check])
+                    if 0 in values:
+                        surface_area.extend(point_area)
+                return set(surface_area)
+
+            assert (len(list_occ) == len(list_points))
+            # Fulfill share of occupied points
             result = []
             occ_list = []
             non_occ_list = []
             points_occ_list = list(zip(list_points, list_occ))
-            for coordinate, occupancy in points_occ_list:
-                if occupancy == 1.0:
-                    occ_list.append((coordinate, occupancy))
-                elif occupancy == 0.0:
-                    non_occ_list.append((coordinate, occupancy))
-                else:
-                    raise ValueError
-            occ_number = int(sample_number * share_occ)
-            occ_indices = np.random.randint(len(occ_list), size=occ_number)
-            non_occ_number = self.sampled_points - occ_number
-            non_occ_indices = np.random.randint(len(non_occ_list), size=non_occ_number)
-            for i in occ_indices:
-                result.append(occ_list[i])
-            for j in non_occ_indices:
-                result.append(non_occ_list[j])
-            result = list(zip(*result))
-            assert(len)
+            if not surface:
+                for coordinate, occupancy in points_occ_list:
+                    if occupancy == 1.0:
+                        occ_list.append((coordinate, occupancy))
+                    elif occupancy == 0.0:
+                        non_occ_list.append((coordinate, occupancy))
+                    else:
+                        raise ValueError
+                occ_number = int(sample_number * share_occ)
+                occ_indices = np.random.randint(len(occ_list), size=occ_number)
+                non_occ_number = self.sampled_points - occ_number
+                non_occ_indices = np.random.randint(len(non_occ_list), size=non_occ_number)
+                for i in occ_indices:
+                    result.append(occ_list[i])
+                for j in non_occ_indices:
+                    result.append(non_occ_list[j])
+                result = list(zip(*result))
+            else:
+                # Use points near surface
+                surface = surface_points(label, 1)
+                surface_list = [x for x in points_occ_list if np.round(x[0] + offset).astype(int) in surface]
+                result = surface_list[np.random.randint(len(surface_list), size=sample_number)]
+            assert(len(result) == sample_number)
             return list(result[0]), list(result[1])
 
         npzfile = np.load(os.path.join(self.root_dir, self.ctsamplesfiles[idx]))
         # load image
         inputs = npzfile['inputs']
-        # draw a subsample of the points
-
-        points = npzfile['points']
-        occ = npzfile['points_occ']
-        points, occ = sample_points(points, occ, self.sampled_points, 0.5)
-        # load labels only during testing/validation
+        # load label
         label = npzfile['labels'][0]
         label_offset = label[0]
         label_box = label[1]
+        # draw a subsample of the points
+        points = npzfile['points']
+        occ = npzfile['points_occ']
+        points, occ = sample_points(points, occ, self.sampled_points, 0.5, label_box, label_offset, surface=True)
+
         padded_label, label_shape = label_to_image_size(label_box, [640, 448, 512])
 
-        sample =\
+        sample = \
             {
                 'points': np.asarray(points),
                 'points.occ': np.asarray(occ), 'inputs': inputs,

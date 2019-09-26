@@ -9,19 +9,19 @@ import time
 import math
 
 parser = argparse.ArgumentParser('Preprocess ct-data.')
-parser.add_argument('--rootdir', type=str, default = "/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/",
+parser.add_argument('--rootdir', type=str,
+                    default="/visinf/projects_students/VCLabOccNet/Smiths_LKA_Weapons/ctix-lka-20190503/",
                     help='ct-images dataset')
-parser.add_argument('--out_folder', type=str, default = "/visinf/projects_students/VCLabOccNet/test",
+parser.add_argument('--out_folder', type=str, default="/visinf/projects_students/VCLabOccNet/test",
                     help='Uniform size of z-dimension.')
-#parser.add_argument('--voxels_res', type=int, default=32,
+# parser.add_argument('--voxels_res', type=int, default=32,
 #                    help='Resolution for voxelization.')/
 parser.add_argument('--points_size', type=int, default=100000,
                     help='Size of points.')
-#parser.add_argument('--overwrite', action='store_true',
+# parser.add_argument('--overwrite', action='store_true',
 #                    help='Whether to overwrite output.')
-parser.add_argument('--z_size', type=int, default = 512,
+parser.add_argument('--z_size', type=int, default=512,
                     help='Uniform size of z-dimension.')
-
 
 LABEL_SUFFIX = "_label_"  # followed by a number and the file format
 MHA_FORMAT = ".mha"
@@ -52,10 +52,10 @@ class CTImages_Preprocessor(object):
                         os.path.join(self.root_dir, sub_dir, filename) not in blacklist):
                     image_counter += 1
                     file_counter += 1
-            print("Images in subdir: ",image_counter)
-        self.train_length = math.floor(0.7*file_counter)
-        self.val_length = math.ceil(0.1*file_counter)
-        self.test_length = math.floor(0.2*file_counter)
+            print("Images in subdir: ", image_counter)
+        self.train_length = math.floor(0.7 * file_counter)
+        self.val_length = math.ceil(0.1 * file_counter)
+        self.test_length = math.floor(0.2 * file_counter)
         allfiles_number = 0
         train_flag = True
         val_flag = True
@@ -65,7 +65,6 @@ class CTImages_Preprocessor(object):
             for filename in sub_dir_files:
                 if filename.endswith(MHA_FORMAT) and (LABEL_SUFFIX not in filename) and (
                         os.path.join(self.root_dir, sub_dir, filename) not in blacklist):
-
                     allfiles_number += 1
                     # Image paths
                     image_filepath = os.path.join(self.root_dir, sub_dir, filename)
@@ -110,7 +109,8 @@ class CTImages_Preprocessor(object):
             labels = self.determine_offsets(image_shape, mha_labels, opt.z_size)
             points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_size, image_shape)
 
-            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image, 'labels': labels}
+            sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image,
+                      'labels': labels}
             sample_name = os.path.basename(self.allfiles[idx][0])[0:-4]
             self.save_sample(sample, sample_name)
 
@@ -134,13 +134,14 @@ class CTImages_Preprocessor(object):
                 print("ERROR")
         return 0
     '''
+
     # Determine bounding boxes
     def determine_offsets(self, shape, label_list, z):
         """
         Determine the offset for each label so we can use these for indexing.
         The voxel spacing will not be taken into account for the new offset, but can be applied again via the label!
         Remove labels from list, if they are partially or completely out of the new cropped image
-        :param image_shape: the shape of the image (620, 420, z), determines if image is being cropped or padded
+        :param shape: the shape of the image (620, 420, z), determines if image is being cropped or padded
         :param label_list: A list of labels for the corresponding image
         :param z: Number that indicates
         :return: list of tuples with tuples being (new offset, label), number of discarded labels
@@ -188,7 +189,7 @@ class CTImages_Preprocessor(object):
                 # Invert y
                 offset = [label[1].offset[0] + x_pad, -1 * label[1].offset[1] + y_pad, z_offset + z_pad]
                 offsets_and_labels.append([offset, label[0]])
-                #print(label[0])
+                # print(label[0])
 
         return offsets_and_labels
 
@@ -233,7 +234,7 @@ class CTImages_Preprocessor(object):
             # print("Offset: ", offset)
             # Label shape
             shape = label[1].shape
-            #print("Shape: ", shape)
+            # print("Shape: ", shape)
             # Array with one offset for each point in points
             offset_array = np.empty(points.shape)
             offset_array[:] = np.array(offset)
@@ -241,8 +242,8 @@ class CTImages_Preprocessor(object):
             nearest_points = np.round(points).astype(int)
             # Get label indices for each given point
             nearest_points = np.round(nearest_points - offset_array).astype(int)
-            #print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]), max(nearest_points[:, 2]))
-            #print("Shape: ", shape)
+            # print("Max x,y,z in shape: ", max(nearest_points[:, 0]), max(nearest_points[:, 1]), max(nearest_points[:, 2]))
+            # print("Shape: ", shape)
             # Look up occupancy values of points
             return label[1][nearest_points[:, 0], nearest_points[:, 1], nearest_points[:, 2]]
 
@@ -294,7 +295,8 @@ class CTImages_Preprocessor(object):
 
     def save_sample(self, sample, sample_name):
         outpath = os.path.join(self.options.out_folder, sample_name)
-        np.savez(outpath, points=sample['points'], points_occ= sample['points.occ'], inputs= sample['inputs'], labels = sample['labels'])
+        np.savez(outpath, points=sample['points'], points_occ=sample['points.occ'], inputs=sample['inputs'],
+                 labels=sample['labels'])
         print("Saved file: ", outpath)
 
 
@@ -307,7 +309,7 @@ def main(args):
     start = time.time()
     preprocessor.preprocess()
     end = time.time()
-    print("Preprocessed", preprocessor.num_images(), "examples in", end-start, "seconds")
+    print("Preprocessed", preprocessor.num_images(), "examples in", end - start, "seconds")
 
 
 if __name__ == '__main__':
