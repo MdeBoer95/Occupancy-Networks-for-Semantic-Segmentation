@@ -49,7 +49,7 @@ if not os.path.exists(out_dir):
 
 # Split dataset
 # 70% train, 10% val, 20% test
-dataset = ct.CTImagesDataset(root)
+dataset = ct.CTImagesDataset(root, sampled_points=cfg['data']['points_subsample'])
 dataset_length = len(dataset)
 # Numbers from preprocessing script
 train_dataset = torch_data.Subset(dataset, list(range(0, 1775)))

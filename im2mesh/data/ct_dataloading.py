@@ -77,9 +77,9 @@ class CTImagesDataset(Dataset):
 
                 # bounding box is limit
                 allowed = [range(bounding_box.shape[0]), range(bounding_box.shape[1]), range(bounding_box.shape[2])]
-
-                occupied = np.where(bounding_box == 1)
+                occupied = np.transpose(np.where(bounding_box == 1))
                 surface_area = []
+                start = time.time()
                 for point in occupied:
                     values = []
                     point_area = []
@@ -87,10 +87,14 @@ class CTImagesDataset(Dataset):
                         check = point + space
                         if check[0] in allowed[0] and check[1] in allowed[1] and check[2] in allowed[2]:
                             point_area.append(check)
-                            values.append(bounding_box[check])
-                    if 0 in values:
+                            values.append(bounding_box[check[0], check[1], check[2]])
+
+                    if values.count(0) > 0:
                         surface_area.extend(point_area)
-                return set(surface_area)
+                end = time.time()
+                print("Time needed for number of points: ", len(occupied), end - start)
+                print(surface_area)
+                return surface_area
 
             assert (len(list_occ) == len(list_points))
             # Fulfill share of occupied points
@@ -118,11 +122,10 @@ class CTImagesDataset(Dataset):
             else:
                 # Use points near surface
                 surface = surface_points(label, 1)
-                surface_list = [x for x in points_occ_list if np.round(x[0] + offset).astype(int) in surface]
+                surface_list = [x for x in points_occ_list if np.round(x[0] - offset).astype(int) in surface]
                 result = surface_list[np.random.randint(len(surface_list), size=sample_number)]
-            assert(len(result) == sample_number)
+            assert(len(result[0]) == sample_number)
             return list(result[0]), list(result[1])
-
         npzfile = np.load(os.path.join(self.root_dir, self.ctsamplesfiles[idx]))
         # load image
         inputs = npzfile['inputs']
@@ -133,7 +136,7 @@ class CTImagesDataset(Dataset):
         # draw a subsample of the points
         points = npzfile['points']
         occ = npzfile['points_occ']
-        points, occ = sample_points(points, occ, self.sampled_points, 0.5, label_box, label_offset, surface=True)
+        points, occ = sample_points(points, occ, self.sampled_points, 0.5, label_box, label_offset, surface=False)
 
         padded_label, label_shape = label_to_image_size(label_box, [640, 448, 512])
 

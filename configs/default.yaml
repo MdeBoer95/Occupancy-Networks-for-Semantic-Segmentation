@@ -10,7 +10,7 @@ data:
   dim: 3
   points_file: points.npz
   points_iou_file: points.npz
-  points_subsample: 1024
+  points_subsample: 2048
   points_unpackbits: true
   model_file: model.off
   watertight_file: model_watertight.off
@@ -43,7 +43,7 @@ training:
   batch_size: 64
   print_every: 14
   visualize_every: 2000
-  checkpoint_every: 1300
+  checkpoint_every: 280
   validate_every: 28
   backup_every: 280
   eval_sample: false
