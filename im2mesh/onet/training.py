@@ -239,7 +239,7 @@ class Trainer(BaseTrainer):
         z_lab = label_occ[2]
         # plt.interactive(False)
         print('Started plots')
-        fig = plt.figure(figsize=(3.840, 1.080), dpi=100)
+        fig = plt.figure()
         ax0 = fig.add_subplot(1, 2, 1, projection='3d')
         ax0.scatter(np.array(x_pred), np.array(y_pred), np.array(z_pred), marker=',', alpha=0.5)
         ax0.set_title('Prediction')
@@ -265,7 +265,7 @@ class Trainer(BaseTrainer):
             ax0.view_init(30, angle)
             ax1.view_init(30, angle)
             plt.draw()
-            plt.savefig('img_with_mise_full_res' + str(angle), dpi=200)
+            plt.savefig('img_with_mise_full_res' + str(angle), dpi=300)
         print('Finished plots')
 
         '''
