@@ -231,17 +231,17 @@ class Trainer(BaseTrainer):
             = label
         occ_pred_occ = np.where(occ_pred == 1)
         label_occ = np.where(label_truth == 1)
-        X_pred = occ_pred_occ[0]
-        Y_pred = occ_pred_occ[1]
-        Z_pred = occ_pred_occ[2]
-        X_lab = label_occ[0]
-        Y_lab = label_occ[1]
-        Z_lab = label_occ[2]
+        x_pred = occ_pred_occ[0]
+        y_pred = occ_pred_occ[1]
+        z_pred = occ_pred_occ[2]
+        x_lab = label_occ[0]
+        y_lab = label_occ[1]
+        z_lab = label_occ[2]
         # plt.interactive(False)
         print('Started plots')
         fig = plt.figure(figsize=(1.080, 3.840), dpi=100)
         ax0 = fig.add_subplot(1, 2, 1, projection='3d')
-        ax0.scatter(np.array(X_pred), np.array(Y_pred), np.array(Z_pred), marker=',', alpha=0.5)
+        ax0.scatter(np.array(x_pred), np.array(y_pred), np.array(z_pred), marker=',', alpha=0.5)
         ax0.set_title('Prediction')
         ax0.set_xlabel('X')
         ax0.set_ylabel('Y')
@@ -251,7 +251,7 @@ class Trainer(BaseTrainer):
         ax0.set_zlim(0, occ_pred.shape[2])
 
         ax1 = fig.add_subplot(1, 2, 2, projection='3d')
-        ax1.scatter(np.array(X_lab), np.array(Y_lab), np.array(Z_lab), marker=',', alpha=0.5)
+        ax1.scatter(np.array(x_lab), np.array(y_lab), np.array(z_lab), marker=',', alpha=0.5)
         ax1.set_title('Truth')
         ax1.set_xlabel('X')
         ax1.set_ylabel('Y')
