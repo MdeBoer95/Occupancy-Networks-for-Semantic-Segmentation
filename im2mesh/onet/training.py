@@ -227,10 +227,10 @@ class Trainer(BaseTrainer):
         # Visualization, set debug point at return
 
         label_truth = np.zeros((640, 448, 512))
-        label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1],
-        offset[2]:offset[2] + shape[2]] = label
+        label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]]\
+            = label
         occ_pred_occ = np.where(occ_pred == 1)
-        label_occ = np.where(label == 1)
+        label_occ = np.where(label_truth == 1)
         X_pred = occ_pred_occ[0]
         Y_pred = occ_pred_occ[1]
         Z_pred = occ_pred_occ[2]
@@ -242,6 +242,7 @@ class Trainer(BaseTrainer):
         fig = plt.figure(figsize=(1.080, 3.840), dpi=100)
         ax0 = fig.add_subplot(1, 2, 1, projection='3d')
         ax0.scatter(np.array(X_pred), np.array(Y_pred), np.array(Z_pred), marker=',', alpha=0.5)
+        ax0.set_title('Prediction')
         ax0.set_xlabel('X')
         ax0.set_ylabel('Y')
         ax0.set_zlabel('Z')
@@ -251,6 +252,7 @@ class Trainer(BaseTrainer):
 
         ax1 = fig.add_subplot(1, 2, 2, projection='3d')
         ax1.scatter(np.array(X_lab), np.array(Y_lab), np.array(Z_lab), marker=',', alpha=0.5)
+        ax1.set_title('Truth')
         ax1.set_xlabel('X')
         ax1.set_ylabel('Y')
         ax1.set_zlabel('Z')
