@@ -227,7 +227,7 @@ class Trainer(BaseTrainer):
         # Visualization, set debug point at return
 
         label_truth = np.zeros((640, 448, 512))
-        label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]]\
+        label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]] \
             = label
         occ_pred_occ = np.where(occ_pred == 1)
         label_occ = np.where(label_truth == 1)
@@ -239,16 +239,16 @@ class Trainer(BaseTrainer):
         z_lab = label_occ[2]
         # plt.interactive(False)
         print('Started plots')
-        fig = plt.figure()
+        fig = plt.figure(figsize=(16.0, 6.0))
         ax0 = fig.add_subplot(1, 2, 1, projection='3d')
         ax0.scatter(np.array(x_pred), np.array(y_pred), np.array(z_pred), marker=',', alpha=0.5)
         ax0.set_title('Prediction')
         ax0.set_xlabel('X')
         ax0.set_ylabel('Y')
         ax0.set_zlabel('Z')
-        #ax0.set_xlim(0, occ_pred.shape[0])
-        #ax0.set_ylim(0, occ_pred.shape[1])
-        #ax0.set_zlim(0, occ_pred.shape[2])
+        # ax0.set_xlim(0, occ_pred.shape[0])
+        # ax0.set_ylim(0, occ_pred.shape[1])
+        # ax0.set_zlim(0, occ_pred.shape[2])
 
         ax1 = fig.add_subplot(1, 2, 2, projection='3d')
         ax1.scatter(np.array(x_lab), np.array(y_lab), np.array(z_lab), marker=',', alpha=0.5)
@@ -256,9 +256,9 @@ class Trainer(BaseTrainer):
         ax1.set_xlabel('X')
         ax1.set_ylabel('Y')
         ax1.set_zlabel('Z')
-        #ax1.set_xlim(0, occ_pred.shape[0])
-        #ax1.set_ylim(0, occ_pred.shape[1])
-        #ax1.set_zlim(0, occ_pred.shape[2])
+        # ax1.set_xlim(0, occ_pred.shape[0])
+        # ax1.set_ylim(0, occ_pred.shape[1])
+        # ax1.set_zlim(0, occ_pred.shape[2])
         # rotate the axes and update
         print('Started saving')
         for angle in range(0, 360, 60):
