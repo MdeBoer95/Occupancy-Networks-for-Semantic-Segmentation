@@ -229,47 +229,42 @@ class Trainer(BaseTrainer):
         label_truth = np.zeros((640, 448, 512))
         label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1],
         offset[2]:offset[2] + shape[2]] = label
-        X_pred = []
-        Y_pred = []
-        Z_pred = []
-        X_lab = []
-        Y_lab = []
-        Z_lab = []
-        print('Started finding occupancies')
-        print('Label', np.where(label_truth == 1))
-        print('Prediction', np.where(occ_pred == 1))
-
+        occ_pred_occ = np.where(occ_pred == 1)
+        label_occ = np.where(label == 1)
+        X_pred = occ_pred_occ[0]
+        Y_pred = occ_pred_occ[1]
+        Z_pred = occ_pred_occ[2]
+        X_lab = label_occ[0]
+        Y_lab = label_occ[1]
+        Z_lab = label_occ[2]
         # plt.interactive(False)
-
-        print('For loop done. Started scattering')
-
-        fig = plt.figure(figsize=(1.080, 1.920), dpi=100)
-        ax = fig.add_subplot(1, 2, 1, projection='3d')
-        ax.scatter(np.array(X_pred), np.array(Y_pred), np.array(Z_pred), marker=',', alpha=0.5)
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        ax.set_xlim(0, occ_pred_label.shape[0])
-        ax.set_ylim(0, occ_pred_label.shape[1])
-        ax.set_zlim(0, occ_pred_label.shape[2])
+        print('Started plots')
+        fig = plt.figure(figsize=(1.080, 3.840), dpi=100)
+        ax0 = fig.add_subplot(1, 2, 1, projection='3d')
+        ax0.scatter(np.array(X_pred), np.array(Y_pred), np.array(Z_pred), marker=',', alpha=0.5)
+        ax0.set_xlabel('X')
+        ax0.set_ylabel('Y')
+        ax0.set_zlabel('Z')
+        ax0.set_xlim(0, occ_pred.shape[0])
+        ax0.set_ylim(0, occ_pred.shape[1])
+        ax0.set_zlim(0, occ_pred.shape[2])
 
         ax1 = fig.add_subplot(1, 2, 2, projection='3d')
         ax1.scatter(np.array(X_lab), np.array(Y_lab), np.array(Z_lab), marker=',', alpha=0.5)
         ax1.set_xlabel('X')
         ax1.set_ylabel('Y')
         ax1.set_zlabel('Z')
-        ax1.set_xlim(0, occ_pred_label.shape[0])
-        ax1.set_ylim(0, occ_pred_label.shape[1])
-        ax1.set_zlim(0, occ_pred_label.shape[2])
-        print('Done scattering')
+        ax1.set_xlim(0, occ_pred.shape[0])
+        ax1.set_ylim(0, occ_pred.shape[1])
+        ax1.set_zlim(0, occ_pred.shape[2])
         # rotate the axes and update
+        print('Started saving')
         for angle in range(0, 360, 60):
-            ax.view_init(30, angle)
+            ax0.view_init(30, angle)
             ax1.view_init(30, angle)
             plt.draw()
-            plt.savefig('img_with_mise_whole' + str(angle), dpi=1000)
-
-
+            plt.savefig('img_with_mise_full_res' + str(angle), dpi=1000)
+        print('Finished plots')
 
         '''
         # Recalculate threshold
