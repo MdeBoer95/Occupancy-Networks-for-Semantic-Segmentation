@@ -1,4 +1,6 @@
 import os
+import random
+
 from tqdm import trange
 import torch
 from torch.nn import functional as F
@@ -262,10 +264,11 @@ class Trainer(BaseTrainer):
         # rotate the axes and update
         print('Started saving')
         for angle in range(0, 360, 60):
+            num = random.randint(1,100)
             ax0.view_init(-15, angle)
             ax1.view_init(-15, angle)
             plt.draw()
-            plt.savefig('img_with_mise_full_res' + str(angle), dpi=300)
+            plt.savefig('img_' + num + str(angle), dpi=300)
         print('Finished plots')
 
         '''
