@@ -268,7 +268,7 @@ class Trainer(BaseTrainer):
             ax0.view_init(-15, angle)
             ax1.view_init(-15, angle)
             plt.draw()
-            plt.savefig('img_' + num + str(angle), dpi=300)
+            plt.savefig('img_' + str(num) + str(angle), dpi=300)
         print('Finished plots')
 
         '''
