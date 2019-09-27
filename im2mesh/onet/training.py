@@ -241,8 +241,8 @@ class Trainer(BaseTrainer):
         z_lab = label_occ[2]
         # plt.interactive(False)
         print('Started plots')
-        fig = plt.figure(figsize=(16.0, 6.0))
-        ax0 = fig.add_subplot(1, 2, 1, projection='3d')
+        fig = plt.figure(figsize=(16.0, 12.0))
+        ax0 = fig.add_subplot(2, 2, 1, projection='3d')
         ax0.scatter(np.array(x_pred), np.array(y_pred), np.array(z_pred), marker=',', alpha=0.5)
         ax0.set_title('Prediction')
         ax0.set_xlabel('X')
@@ -252,7 +252,7 @@ class Trainer(BaseTrainer):
         # ax0.set_ylim(0, occ_pred.shape[1])
         # ax0.set_zlim(0, occ_pred.shape[2])
 
-        ax1 = fig.add_subplot(1, 2, 2, projection='3d')
+        ax1 = fig.add_subplot(2, 2, 2, projection='3d')
         ax1.scatter(np.array(x_lab), np.array(y_lab), np.array(z_lab), marker=',', alpha=0.5)
         ax1.set_title('Truth')
         ax1.set_xlabel('X')
@@ -261,10 +261,31 @@ class Trainer(BaseTrainer):
         # ax1.set_xlim(0, occ_pred.shape[0])
         # ax1.set_ylim(0, occ_pred.shape[1])
         # ax1.set_zlim(0, occ_pred.shape[2])
+
+        ax2 = fig.add_subplot(2, 2, 3, projection='3d')
+        ax2.scatter(np.array(x_pred), np.array(y_pred), np.array(z_pred), marker=',', alpha=0.5)
+        ax2.set_title('Prediction')
+        ax2.set_xlabel('X')
+        ax2.set_ylabel('Y')
+        ax2.set_zlabel('Z')
+        ax2.set_xlim(0, occ_pred.shape[0])
+        ax2.set_ylim(0, occ_pred.shape[1])
+        ax2.set_zlim(0, occ_pred.shape[2])
+
+        ax3 = fig.add_subplot(2, 2, 4, projection='3d')
+        ax3.scatter(np.array(x_lab), np.array(y_lab), np.array(z_lab), marker=',', alpha=0.5)
+        ax3.set_title('Truth')
+        ax3.set_xlabel('X')
+        ax3.set_ylabel('Y')
+        ax3.set_zlabel('Z')
+        ax3.set_xlim(0, occ_pred.shape[0])
+        ax3.set_ylim(0, occ_pred.shape[1])
+        ax3.set_zlim(0, occ_pred.shape[2])
         # rotate the axes and update
         print('Started saving')
+        num = random.randint(1, 100)
         for angle in range(0, 360, 60):
-            num = random.randint(1,100)
+
             ax0.view_init(-15, angle)
             ax1.view_init(-15, angle)
             plt.draw()
