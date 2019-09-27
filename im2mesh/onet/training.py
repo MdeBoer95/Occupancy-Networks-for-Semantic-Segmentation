@@ -225,8 +225,7 @@ class Trainer(BaseTrainer):
         eval_dict['iou_complete'] = overall_iou(occ_pred, occ_pred_label, label, smooth)
 
         # Visualization, set debug point at return
-        '''
-        print('Started label')
+
         label_truth = np.zeros((640, 448, 512))
         label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1],
         offset[2]:offset[2] + shape[2]] = label
@@ -236,25 +235,15 @@ class Trainer(BaseTrainer):
         X_lab = []
         Y_lab = []
         Z_lab = []
-        print('Started for loops')
-        for x in range(occ_pred.shape[0]):
-            #print('X: ', x)
-            for y in range(occ_pred.shape[1]):
-                #print('Y: ', y)
-                for z in range(occ_pred.shape[2]):
-                    if occ_pred[x, y, z] == 1:
-                        X_pred.append(int(x))
-                        Y_pred.append(int(y))
-                        Z_pred.append(int(z))
-                    if label_truth[x, y, z] == 1:
-                        X_lab.append(int(x))
-                        Y_lab.append(int(y))
-                        Z_lab.append(int(z))
+        print('Started finding occupancies')
+        print('Label', np.where(label_truth == 1))
+        print('Prediction', np.where(occ_pred == 1))
+
         # plt.interactive(False)
 
         print('For loop done. Started scattering')
 
-        fig = plt.figure()
+        fig = plt.figure(figsize=(1.080, 1.920), dpi=100)
         ax = fig.add_subplot(1, 2, 1, projection='3d')
         ax.scatter(np.array(X_pred), np.array(Y_pred), np.array(Z_pred), marker=',', alpha=0.5)
         ax.set_xlabel('X')
@@ -278,10 +267,10 @@ class Trainer(BaseTrainer):
             ax.view_init(30, angle)
             ax1.view_init(30, angle)
             plt.draw()
-            plt.savefig('img_with_mise_whole' + str(angle))
+            plt.savefig('img_with_mise_whole' + str(angle), dpi=1000)
 
-        exit()
-        '''
+
+
         '''
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?
