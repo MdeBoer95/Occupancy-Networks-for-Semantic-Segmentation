@@ -215,19 +215,19 @@ class Trainer(BaseTrainer):
         # remove padding from grid
         occ_pred = (occ_grid >= threshold).astype(int)[:640, :448, :512]
         # Get label data
-        offset = data.get('label_offset')[1].numpy().astype(int)
-        shape = data.get('label_shape')[1].numpy()
+        offset = data.get('label_offset')[0].numpy().astype(int)
+        shape = data.get('label_shape')[0].numpy()
         # get the part from occ_grid where the label should be
         occ_pred_label = \
             occ_pred[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]]
         # remove padding from label
-        label = data.get('padded_label')[1].numpy()[:shape[0], :shape[1], :shape[2]]
+        label = data.get('padded_label')[0].numpy()[:shape[0], :shape[1], :shape[2]]
 
         eval_dict['iou_label'] = label_iou(occ_pred_label, label, smooth)
         eval_dict['iou_complete'] = overall_iou(occ_pred, occ_pred_label, label, smooth)
 
         # Visualization, set debug point at return
-
+        '''
         label_truth = np.zeros((640, 448, 512))
         label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]] \
             = label
@@ -291,7 +291,7 @@ class Trainer(BaseTrainer):
             plt.draw()
             plt.savefig('img_' + str(num) + str(angle), dpi=300)
         print('Finished plots')
-
+        '''
         '''
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?
