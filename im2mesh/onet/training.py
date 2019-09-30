@@ -217,6 +217,7 @@ class Trainer(BaseTrainer):
         # Get label data
         offset = data.get('label_offset')[0].numpy().astype(int)
         shape = data.get('label_shape')[0].numpy()
+
         # get the part from occ_grid where the label should be
         occ_pred_label = \
             occ_pred[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]]
@@ -227,23 +228,20 @@ class Trainer(BaseTrainer):
         eval_dict['iou_complete'] = overall_iou(occ_pred, occ_pred_label, label, smooth)
 
         # Visualization, set debug point at return
-        '''
+        """
+        print("Started plotting")
         label_truth = np.zeros((640, 448, 512))
         label_truth[offset[0]:offset[0] + shape[0], offset[1]:offset[1] + shape[1], offset[2]:offset[2] + shape[2]] \
             = label
-        occ_pred_occ = np.where(occ_pred == 1)
-        label_occ = np.where(label_truth == 1)
-        x_pred = occ_pred_occ[0]
-        y_pred = occ_pred_occ[1]
-        z_pred = occ_pred_occ[2]
-        x_lab = label_occ[0]
-        y_lab = label_occ[1]
-        z_lab = label_occ[2]
+        x_p, y_p, z_p = np.where(occ_pred_label == 1)
+        x_l, y_l, z_l = np.where(label == 1)
+        x_p_c, y_p_c, z_p_c = np.where(occ_pred == 1)
+        x_l_c, y_l_c, z_l_c = np.where(label_truth == 1)
         # plt.interactive(False)
         print('Started plots')
         fig = plt.figure(figsize=(16.0, 12.0))
         ax0 = fig.add_subplot(2, 2, 1, projection='3d')
-        ax0.scatter(np.array(x_pred), np.array(y_pred), np.array(z_pred), marker=',', alpha=0.5)
+        ax0.scatter(x_p, y_p, z_p, marker=',', alpha=0.5)
         ax0.set_title('Prediction')
         ax0.set_xlabel('X')
         ax0.set_ylabel('Y')
@@ -253,7 +251,7 @@ class Trainer(BaseTrainer):
         # ax0.set_zlim(0, occ_pred.shape[2])
 
         ax1 = fig.add_subplot(2, 2, 2, projection='3d')
-        ax1.scatter(np.array(x_lab), np.array(y_lab), np.array(z_lab), marker=',', alpha=0.5)
+        ax1.scatter(x_l, y_l, z_l, marker=',', alpha=0.5)
         ax1.set_title('Truth')
         ax1.set_xlabel('X')
         ax1.set_ylabel('Y')
@@ -263,7 +261,7 @@ class Trainer(BaseTrainer):
         # ax1.set_zlim(0, occ_pred.shape[2])
 
         ax2 = fig.add_subplot(2, 2, 3, projection='3d')
-        ax2.scatter(np.array(x_pred), np.array(y_pred), np.array(z_pred), marker=',', alpha=0.5)
+        ax2.scatter(x_p_c, y_p_c, z_p_c, marker=',', alpha=0.5)
         ax2.set_title('Prediction')
         ax2.set_xlabel('X')
         ax2.set_ylabel('Y')
@@ -273,7 +271,7 @@ class Trainer(BaseTrainer):
         ax2.set_zlim(0, occ_pred.shape[2])
 
         ax3 = fig.add_subplot(2, 2, 4, projection='3d')
-        ax3.scatter(np.array(x_lab), np.array(y_lab), np.array(z_lab), marker=',', alpha=0.5)
+        ax3.scatter(x_l_c, y_l_c, z_l_c, marker=',', alpha=0.5)
         ax3.set_title('Truth')
         ax3.set_xlabel('X')
         ax3.set_ylabel('Y')
@@ -286,12 +284,14 @@ class Trainer(BaseTrainer):
         num = random.randint(1, 100)
         for angle in range(0, 360, 60):
 
-            ax0.view_init(-15, angle)
-            ax1.view_init(-15, angle)
+            ax0.view_init(30, angle)
+            ax1.view_init(30, angle)
+            ax2.view_init(30, angle)
+            ax3.view_init(30, angle)
             plt.draw()
-            plt.savefig('img_' + str(num) + str(angle), dpi=300)
+            plt.savefig('img_trainvis' + str(num) + str(angle), dpi=300)
         print('Finished plots')
-        '''
+        """
         '''
         # Recalculate threshold
         threshold_grid = np.log(threshold) - np.log(1. - threshold) # Always 0?

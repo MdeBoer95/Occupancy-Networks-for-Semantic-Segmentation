@@ -16,8 +16,8 @@ parser.add_argument('--out_folder', type=str, default="/visinf/projects_students
                     help='Uniform size of z-dimension.')
 # parser.add_argument('--voxels_res', type=int, default=32,
 #                    help='Resolution for voxelization.')/
-parser.add_argument('--points_size', type=int, default=100000,
-                    help='Size of points.')
+parser.add_argument('--points_nr', type=int, default=100000,
+                    help='Number of points.')
 # parser.add_argument('--overwrite', action='store_true',
 #                    help='Whether to overwrite output.')
 parser.add_argument('--z_size', type=int, default=512,
@@ -107,7 +107,7 @@ class CTImages_Preprocessor(object):
             image = image_transform(image)
 
             labels = self.determine_offsets(image_shape, mha_labels, opt.z_size)
-            points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_size, image_shape)
+            points, points_occ = self._sample_points_inside_boundingboxes(labels, opt.points_nr, image_shape)
 
             sample = {'points': points.astype('float32'), 'points.occ': points_occ.astype('float32'), 'inputs': image,
                       'labels': labels}

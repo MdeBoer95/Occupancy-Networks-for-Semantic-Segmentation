@@ -1,6 +1,7 @@
 import os
 import itertools
 import random
+import math
 
 import numpy as np
 from medpy.io import load
@@ -10,6 +11,7 @@ import im2mesh.data.ct_transforms as ct_transforms
 import time
 import torch
 import operator
+import matplotlib.pyplot as plt
 
 LABEL_SUFFIX = "_label_"  # followed by a number and the file format
 MHA_FORMAT = ".mha"
@@ -124,8 +126,9 @@ class CTImagesDataset(Dataset):
                 surface = surface_points(label, 1)
                 surface_list = [x for x in points_occ_list if np.round(x[0] - offset).astype(int) in surface]
                 result = surface_list[np.random.randint(len(surface_list), size=sample_number)]
-            assert(len(result[0]) == sample_number)
+            assert (len(result[0]) == sample_number)
             return list(result[0]), list(result[1])
+
         npzfile = np.load(os.path.join(self.root_dir, self.ctsamplesfiles[idx]))
         # load image
         inputs = npzfile['inputs']
@@ -133,6 +136,17 @@ class CTImagesDataset(Dataset):
         label = npzfile['labels'][0]
         label_offset = label[0]
         label_box = label[1]
+        # Visualize input
+        '''
+        fig = plt.figure()
+        ax0 = fig.add_subplot(1, 1, 1, projection='3d')
+        ax0.view_init(azim=30)
+        for i in range(0, int(np.max(inputs)) + 1):
+            z, x, y = (inputs == i).nonzero()
+            ax0.scatter(x, y, -z, c=str(i / np.max(inputs)), alpha=0.4, marker='o', s=5)
+
+        plt.savefig("/visinf/home/sochs/scatter.jpg")
+        '''
         # draw a subsample of the points
         points = npzfile['points']
         occ = npzfile['points_occ']
