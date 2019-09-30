@@ -104,7 +104,7 @@ nparameters = sum(p.numel() for p in model.parameters())
 # print(model)
 print('Total number of parameters: %d' % nparameters)
 
-metric_log_path = "metric_log"
+metric_log_path = "metric_log_testing"
 if os.path.exists(metric_log_path) and not os.stat(metric_log_path).st_size == 0:
     warnings.warn("Metric log file: \"" + metric_log_path + "\" already exists and is not empty.")
 
@@ -122,10 +122,10 @@ for i, batch in enumerate(test_loader, 0):
         metric_logger.writerow(row)
 
     metric_val = eval_dict[model_selection_metric]
-    print('Validation metric (%s): %.4f'
-          % (model_selection_metric, metric_val))
-    print('Precision:', eval_dict['precision'])
-    print('Recall:', eval_dict['recall'])
+    print('Accuracy: ', eval_dict['accuracy'])
+    print('Precision: ', eval_dict['precision'])
+    print('Recall: ', eval_dict['recall'])
+    print('IoU inside: ', eval_dict['iou_label'])
 
     for k, v in eval_dict.items():
         logger.add_scalar('val/%s' % k, v, it)
