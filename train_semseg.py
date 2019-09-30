@@ -163,7 +163,7 @@ while True:
             metric_val = eval_dict[model_selection_metric]
             print('Validation metric (%s): %.4f'
                   % (model_selection_metric, metric_val))
-            print('Accuracy: ', eval_dict['accuracy'])
+            print('Accuracy: ', eval_dict['points_accuracy'])
             print('Precision: ', eval_dict['precision'])
             print('Recall: ', eval_dict['recall'])
             print('IoU inside: ', eval_dict['iou_label'])

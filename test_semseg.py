@@ -122,7 +122,7 @@ for i, batch in enumerate(test_loader, 0):
         metric_logger.writerow(row)
 
     metric_val = eval_dict[model_selection_metric]
-    print('Accuracy: ', eval_dict['accuracy'])
+    print('Accuracy: ', eval_dict['points_accuracy'])
     print('Precision: ', eval_dict['precision'])
     print('Recall: ', eval_dict['recall'])
     print('IoU inside: ', eval_dict['iou_label'])
