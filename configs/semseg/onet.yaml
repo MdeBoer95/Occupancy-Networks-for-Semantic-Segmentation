@@ -15,7 +15,7 @@ training:
   model_selection_metric: iou_complete
   model_selection_mode: maximize
   checkpoint_every: 280
-  validate_every: 1
+  validate_every: 28
 test:
   threshold: 0.5
   eval_mesh: true
